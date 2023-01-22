@@ -1,0 +1,30 @@
+CREATE TABLE `ShoppingCart` (
+  `ShoppingCartID` int(11) NOT NULL,
+  `MemberID` int(11) NOT NULL,
+  `GoodsID` int(11) NOT NULL,
+  `ColorID` int(11) NOT NULL,
+  `SizeID` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- 已傾印資料表的索引
+--
+
+--
+-- 資料表索引 `ShoppingCart`
+--
+ALTER TABLE `ShoppingCart`
+  ADD PRIMARY KEY (`ShoppingCartID`);
+
+--
+-- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
+--
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `ShoppingCart`
+--
+ALTER TABLE `ShoppingCart`
+  MODIFY `ShoppingCartID` int(11) NOT NULL AUTO_INCREMENT;
+COMMIT;

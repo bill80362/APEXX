@@ -1,0 +1,30 @@
+CREATE TABLE `Promote` (
+  `PromoteID` int(11) NOT NULL,
+  `Image1` varchar(100) NOT NULL,
+  `Image2` varchar(100) NOT NULL,
+  `Link` varchar(200) NOT NULL,
+  `Seq` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- 已傾印資料表的索引
+--
+
+--
+-- 資料表索引 `Promote`
+--
+ALTER TABLE `Promote`
+  ADD PRIMARY KEY (`PromoteID`);
+
+--
+-- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
+--
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `Promote`
+--
+ALTER TABLE `Promote`
+  MODIFY `PromoteID` int(11) NOT NULL AUTO_INCREMENT;
+

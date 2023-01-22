@@ -1,0 +1,31 @@
+CREATE TABLE `WebLinkCategory` (
+  `WebLinkCategoryID` int(11) NOT NULL,
+  `Title` varchar(100) NOT NULL,
+  `Seq` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `WebLinkCategory`
+  ADD PRIMARY KEY (`WebLinkCategoryID`);
+
+ALTER TABLE `WebLinkCategory`
+  MODIFY `WebLinkCategoryID` int(11) NOT NULL AUTO_INCREMENT;
+-- --------------------------------------------------------
+CREATE TABLE `WebLink` (
+  `WebLinkID` int(11) NOT NULL,
+  `WebLinkCategoryID` int(11) NOT NULL,
+  `Title` varchar(100) NOT NULL,
+  `Link` varchar(200) NOT NULL,
+  `Seq` int(11) NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `WebLink`
+  ADD PRIMARY KEY (`WebLinkID`);
+
+ALTER TABLE `WebLink`
+  MODIFY `WebLinkID` int(11) NOT NULL AUTO_INCREMENT;
+
+

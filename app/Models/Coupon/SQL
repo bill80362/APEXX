@@ -1,0 +1,38 @@
+
+CREATE TABLE `Discount` (
+  `DiscountID` int(11) NOT NULL,
+  `DiscountType` char(1) NOT NULL COMMENT '[優惠類型]P打折,G贈品,D免運',
+  `Title` varchar(100) NOT NULL,
+  `DiscountPercent` int(11) NOT NULL COMMENT '折扣%',
+  `GiveName` varchar(200) NOT NULL COMMENT '贈品名稱',
+  `Image1` varchar(200) NOT NULL COMMENT '贈品圖片',
+  `Combine` char(1) NOT NULL COMMENT '組合優惠',
+  `Threshold` int(11) NOT NULL COMMENT '優惠門檻',
+  `LimitMember` char(1) NOT NULL COMMENT '限定會員',
+  `StartTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '優惠起始',
+  `EndTime` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '優惠結束',
+  `Status` char(1) NOT NULL COMMENT '開關',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- 已傾印資料表的索引
+--
+
+--
+-- 資料表索引 `Discount`
+--
+ALTER TABLE `Discount`
+  ADD PRIMARY KEY (`DiscountID`);
+
+--
+-- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
+--
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `Discount`
+--
+ALTER TABLE `Discount`
+  MODIFY `DiscountID` int(11) NOT NULL AUTO_INCREMENT;
+COMMIT;

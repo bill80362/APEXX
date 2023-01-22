@@ -1,0 +1,33 @@
+CREATE TABLE `Goods` (
+  `GoodsID` int(11) NOT NULL,
+  `Title` varchar(100) NOT NULL,
+  `SubTitle` varchar(100) NOT NULL,
+  `Description` text NOT NULL,
+  `Image1` varchar(100) NOT NULL,
+  `Image2` varchar(100) NOT NULL,
+  `Link` varchar(200) NOT NULL,
+  `Seq` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- 已傾印資料表的索引
+--
+
+--
+-- 資料表索引 `Goods`
+--
+ALTER TABLE `Goods`
+  ADD PRIMARY KEY (`GoodsID`);
+
+--
+-- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
+--
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `Goods`
+--
+ALTER TABLE `Goods`
+  MODIFY `GoodsID` int(11) NOT NULL AUTO_INCREMENT;
+COMMIT;

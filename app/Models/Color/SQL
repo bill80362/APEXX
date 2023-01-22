@@ -1,0 +1,27 @@
+CREATE TABLE `Color` (
+  `ColorID` int(11) NOT NULL,
+  `ColorTitle` varchar(100) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- 已傾印資料表的索引
+--
+
+--
+-- 資料表索引 `Color`
+--
+ALTER TABLE `Color`
+  ADD PRIMARY KEY (`ColorID`);
+
+--
+-- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
+--
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `Color`
+--
+ALTER TABLE `Color`
+  MODIFY `ColorID` int(11) NOT NULL AUTO_INCREMENT;
+COMMIT;

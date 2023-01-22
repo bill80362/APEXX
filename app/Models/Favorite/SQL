@@ -1,0 +1,28 @@
+CREATE TABLE `Favorite` (
+  `FavoriteID` int(11) NOT NULL,
+  `MemberID` int(11) NOT NULL,
+  `FavoriteGoodsID` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- 已傾印資料表的索引
+--
+
+--
+-- 資料表索引 `Favorite`
+--
+ALTER TABLE `Favorite`
+  ADD PRIMARY KEY (`FavoriteID`);
+
+--
+-- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
+--
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `Favorite`
+--
+ALTER TABLE `Favorite`
+  MODIFY `FavoriteID` int(11) NOT NULL AUTO_INCREMENT;
+COMMIT;

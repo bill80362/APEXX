@@ -1,0 +1,31 @@
+CREATE TABLE `MenuCategory` (
+  `MenuCategoryID` int(11) NOT NULL,
+  `Title` varchar(100) NOT NULL,
+  `Seq` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `MenuCategory`
+  ADD PRIMARY KEY (`MenuCategoryID`);
+
+ALTER TABLE `MenuCategory`
+  MODIFY `MenuCategoryID` int(11) NOT NULL AUTO_INCREMENT;
+-- --------------------------------------------------------
+CREATE TABLE `Menu` (
+  `MenuID` int(11) NOT NULL,
+  `MenuCategoryID` int(11) NOT NULL,
+  `Title` varchar(100) NOT NULL,
+  `Content` text NOT NULL,
+  `Seq` int(11) NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `Menu`
+  ADD PRIMARY KEY (`MenuID`);
+
+ALTER TABLE `Menu`
+  MODIFY `MenuID` int(11) NOT NULL AUTO_INCREMENT;
+
+
