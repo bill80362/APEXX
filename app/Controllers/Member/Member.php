@@ -21,7 +21,8 @@ class Member extends BaseController
         //Res
         return $this->respond(ResponseData::success($Data));
     }
-    public function updateMy(){
+    public function updateMy()
+    {
         $Phone = $this->request->getVar("Phone");
         $Email = $this->request->getVar("Email");
         $Birthday = $this->request->getVar("Birthday");
@@ -31,20 +32,21 @@ class Member extends BaseController
         //
         $oMember = new \App\Models\Member\Member();
         $oMember->protect(false);
-        $oMember->update($LoginMemberID,[
+        $oMember->update($LoginMemberID, [
             "Birthday" => $Birthday,
             "Sex" => $Sex,
 //            "Phone" => $Phone,
 //            "Email" => $Email,
         ]);
-        if($oMember->errors()){
-            $ErrorMsg = implode(",",$oMember->errors());
+        if ($oMember->errors()) {
+            $ErrorMsg = implode(",", $oMember->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         return $this->respond(ResponseData::success([]));
     }
-    public function updatePassword(){
+    public function updatePassword()
+    {
         $Password = $this->request->getVar("Password");
         $NewPassword = $this->request->getVar("NewPassword");
         //
@@ -52,19 +54,20 @@ class Member extends BaseController
         //
         $oMember = new \App\Models\Member\Member();
         $MemberData = $oMember->find($LoginMemberID);
-        if($MemberData["Password"]!=$Password) return $this->respond(ResponseData::fail("原密碼錯誤"));
+        if ($MemberData["Password"]!=$Password) {
+            return $this->respond(ResponseData::fail("原密碼錯誤"));
+        }
         //
         $oMember->resetQuery();
         $oMember->protect(false);
-        $oMember->update($LoginMemberID,[
+        $oMember->update($LoginMemberID, [
             "Password" => $NewPassword,
         ]);
-        if($oMember->errors()){
-            $ErrorMsg = implode(",",$oMember->errors());
+        if ($oMember->errors()) {
+            $ErrorMsg = implode(",", $oMember->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         return $this->respond(ResponseData::success([]));
     }
-
 }

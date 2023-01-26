@@ -11,15 +11,17 @@ namespace App\Libraries\Template;
 class HTML
 {
     public $Attr = [];
-    public function setAttr($Attr){
+    public function setAttr($Attr)
+    {
         $this->Attr = $Attr;
     }
-    public function getData($FileName){
+    public function getData($FileName)
+    {
         //
         $text = file_get_contents(__DIR__."/".$FileName);
         //
-        foreach ($this->Attr as $key => $value){
-            $text = str_replace($key,$value,$text);
+        foreach ($this->Attr as $key => $value) {
+            $text = str_replace($key, $value, $text);
         }
         //
         return $text;

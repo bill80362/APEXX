@@ -11,7 +11,7 @@ class ECReply extends BaseController
         $oECReply = new \App\Models\ECReply\NotifyReply();
         $oECReply->protect(false);
         $oECReply->insert([
-            "PostData"=>print_r($PostData,true),
+            "PostData"=>print_r($PostData, true),
         ]);
         //ECData decode
         $oLibECPay = new \App\Libraries\Payment\ECPay();
@@ -20,19 +20,23 @@ class ECReply extends BaseController
         $oECReply = new \App\Models\ECReply\NotifyReply();
         $oECReply->protect(false);
         $oECReply->insert([
-            "PostData"=>print_r($ECPayData,true),
+            "PostData"=>print_r($ECPayData, true),
         ]);
         //不是陣列那就是錯誤訊息
-        if(!is_array($ECPayData)) exit('0|Error');
+        if (!is_array($ECPayData)) {
+            exit('0|Error');
+        }
 
         //處理資料
         $oTrade = new \App\Models\Trade\Trade();
-        $oTrade->join("Payment","Payment.PaymentID=Trade.PaymentID");
-        $oTrade->whereIn("Trade.Status",["W"]);
+        $oTrade->join("Payment", "Payment.PaymentID=Trade.PaymentID");
+        $oTrade->whereIn("Trade.Status", ["W"]);
         $TradeData = $oTrade->find($ECPayData["MerchantTradeNo"]);
         //找不到資料
-        if(!$TradeData) exit('0|Error');
-        if($TradeData["PaymentType"]=="ATM" && $ECPayData["RtnCode"]==2 ) {
+        if (!$TradeData) {
+            exit('0|Error');
+        }
+        if ($TradeData["PaymentType"]=="ATM" && $ECPayData["RtnCode"]==2) {
             /**ATM 會員取得匯款虛擬帳號**/
             /***
              * Array (
@@ -64,7 +68,7 @@ class ECReply extends BaseController
             /**訂單產生通知**/
             $oLibMail = new \App\Libraries\Tools\Mail();
             $notifyShipping = $oLibMail->notifyTradeSuccess($TradeData["TradeID"]);
-        }elseif($TradeData["PaymentType"]=="CVS" && $ECPayData["RtnCode"]=="10100073" ){
+        } elseif ($TradeData["PaymentType"]=="CVS" && $ECPayData["RtnCode"]=="10100073") {
             /**
              * Array
             (
@@ -98,7 +102,7 @@ class ECReply extends BaseController
             /**訂單產生通知**/
             $oLibMail = new \App\Libraries\Tools\Mail();
             $notifyShipping = $oLibMail->notifyTradeSuccess($TradeData["TradeID"]);
-        }elseif( in_array($TradeData["PaymentType"],["ATM","Credit","CVS"]) && $ECPayData["RtnCode"]==1){
+        } elseif (in_array($TradeData["PaymentType"], ["ATM","Credit","CVS"], true) && $ECPayData["RtnCode"]==1) {
             /**
              * ATM 付款成功
             (
@@ -145,7 +149,7 @@ class ECReply extends BaseController
 
              */
             $oTrade->protect(false);
-            $oTrade->update($TradeData["TradeID"],[
+            $oTrade->update($TradeData["TradeID"], [
                 "Status"=>"P",//已付款
                 "PaymentTime"=>$ECPayData["PaymentDate"],//付款時間
                 "ThirdPartyID"=>$ECPayData["TradeNo"],//綠界ID
@@ -159,13 +163,14 @@ class ECReply extends BaseController
         echo '1|OK';
         exit();
     }
-    public function getLogistics(){
+    public function getLogistics()
+    {
         $PostData = $this->request->getPost();
         //Log
         $oECReply = new \App\Models\ECReply\NotifyReply();
         $oECReply->protect(false);
         $oECReply->insert([
-            "PostData"=>print_r($PostData,true),
+            "PostData"=>print_r($PostData, true),
         ]);
         //ECData decode
         $oLibECPay = new \App\Libraries\Payment\ECPay();
@@ -174,14 +179,14 @@ class ECReply extends BaseController
         $oECReply = new \App\Models\ECReply\NotifyReply();
         $oECReply->protect(false);
         $oECReply->insert([
-            "PostData"=>print_r($ECPayData,true),
+            "PostData"=>print_r($ECPayData, true),
         ]);
         //處理資料
         $oTrade = new \App\Models\Trade\Trade();
-        $oTrade->join("Payment","Payment.PaymentID=Trade.PaymentID");
-        $oTrade->whereIn("Trade.Status",["W"]);
-        $TradeData = $oTrade->find(substr($ECPayData["MerchantTradeNo"],5));
-        if( in_array($TradeData["PaymentType"],["UNIMARTC2C","FAMIC2C"]) && $ECPayData["RtnCode"]==300){
+        $oTrade->join("Payment", "Payment.PaymentID=Trade.PaymentID");
+        $oTrade->whereIn("Trade.Status", ["W"]);
+        $TradeData = $oTrade->find(substr($ECPayData["MerchantTradeNo"], 5));
+        if (in_array($TradeData["PaymentType"], ["UNIMARTC2C","FAMIC2C"], true) && $ECPayData["RtnCode"]==300) {
             /**
              * Array
             (
@@ -211,7 +216,7 @@ class ECReply extends BaseController
             // Unimart 'CVSPaymentNo' => 'C9680734','CVSValidationNo' => '4551',
             $ThirdPartyData = $ECPayData["CVSPaymentNo"]."_".$ECPayData["CVSValidationNo"];
             //
-            $oTrade->update($TradeData["TradeID"],[
+            $oTrade->update($TradeData["TradeID"], [
                 "Status"=>"T",//理貨中
                 "ThirdPartyID"=>$ECPayData["AllPayLogisticsID"],//綠界ID
                 "ThirdPartyData"=>$ThirdPartyData,
@@ -225,14 +230,15 @@ class ECReply extends BaseController
         exit();
     }
     //EC 取Map資訊 POST轉GET
-    public function redirectMapInfo(){
+    public function redirectMapInfo()
+    {
         helper('url');
         $PostData = $this->request->getPost();
         $Attr = [];
-        foreach ($PostData as $key => $value){
+        foreach ($PostData as $key => $value) {
             $Attr[] = $key."=".$value;
         }
-        $redirectURL = "https://www.kolshop.com.tw/cart?".implode("&",$Attr);
+        $redirectURL = "https://www.kolshop.com.tw/cart?".implode("&", $Attr);
         return redirect()->to($redirectURL);
     }
 }

@@ -8,17 +8,19 @@ use CodeIgniter\API\ResponseTrait;
 
 class Discount extends BaseController
 {
-    public $ImageDirPath = "/image/discount";
     use ResponseTrait;
-    public function getList(){
+    public $ImageDirPath = "/image/discount";
+    public function getList()
+    {
         //
         $oDiscount = new \App\Models\Discount\Discount();
-        $oDiscount->orderBy("DiscountID","DESC");
+        $oDiscount->orderBy("DiscountID", "DESC");
         $List = $oDiscount->findAll();
         //Res
         return $this->respond(ResponseData::success($List));
     }
-    public function create(){
+    public function create()
+    {
         //
         $DiscountType = $this->request->getVar("DiscountType");
         $Title = $this->request->getVar("Title");
@@ -49,15 +51,16 @@ class Discount extends BaseController
             "Status"=>$Status,
             "MenuID"=>$MenuID,
         ]);
-        if($oDiscount->errors()){
-            $ErrorMsg = implode(",",$oDiscount->errors());
+        if ($oDiscount->errors()) {
+            $ErrorMsg = implode(",", $oDiscount->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oDiscount->find($DiscountID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function update(){
+    public function update()
+    {
         //
         $ID = $this->request->getVar("ID");
         $DiscountType = $this->request->getVar("DiscountType");
@@ -76,7 +79,9 @@ class Discount extends BaseController
         $oDiscount = new \App\Models\Discount\Discount();
         //檢查ID
         $Data = $oDiscount->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //開始更新
         $oDiscount->protect(false);
         $updateData = [
@@ -92,62 +97,75 @@ class Discount extends BaseController
             "Status"=>$Status,
             "MenuID"=>$MenuID,
         ];
-        if($Image1!==NULL) {
+        if ($Image1!==null) {
             //刪除原本圖檔
-            if( isset($Data["Image1"]) && $Data["Image1"]!="" ){
+            if (isset($Data["Image1"]) && $Data["Image1"]!="") {
                 $FileHostPath = ROOTPATH."public".$Data["Image1"];
-                if(file_exists($FileHostPath))
+                if (file_exists($FileHostPath)) {
                     unlink($FileHostPath);
+                }
             }
             //更新路徑
             $updateData["Image1"] = $Image1;
         }
-        $oDiscount->update($ID,$updateData);
-        if($oDiscount->errors()){
-            $ErrorMsg = implode(",",$oDiscount->errors());
+        $oDiscount->update($ID, $updateData);
+        if ($oDiscount->errors()) {
+            $ErrorMsg = implode(",", $oDiscount->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oDiscount->find($ID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function del($ID){
+    public function del($ID)
+    {
         //
         $oDiscount = new \App\Models\Discount\Discount();
         //檢查ID
         $Data = $oDiscount->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //刪除原本圖檔
-        if( isset($Data["Image1"]) && $Data["Image1"]!="" ){
+        if (isset($Data["Image1"]) && $Data["Image1"]!="") {
             $FileHostPath = ROOTPATH."public".$Data["Image1"];
-            if(file_exists($FileHostPath))
+            if (file_exists($FileHostPath)) {
                 unlink($FileHostPath);
+            }
         }
         //刪除DB
         $oDiscount->protect(false);
         $oDiscount->delete($ID);
-        if($oDiscount->errors()){
-            $ErrorMsg = implode(",",$oDiscount->errors());
+        if ($oDiscount->errors()) {
+            $ErrorMsg = implode(",", $oDiscount->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         return $this->respond(ResponseData::success([]));
     }
-    public function uploadImage($ID){
+    public function uploadImage($ID)
+    {
         $oDiscount = new \App\Models\Discount\Discount();
         //檢查ID
         $Data = $oDiscount->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //上傳圖片 Image 多張
-        for ($i=1;$i<=1;$i++){
+        for ($i=1;$i<=1;$i++) {
             $file = $this->request->getFile('Image'.$i);
-            if ( $file && $file->isFile()) {
-                if($file->getSizeByUnit('mb')>5) return $this->respond(ResponseData::fail("檔案不能超過5MB"));
-                if(!in_array($file->getMimeType(),["image/jpg","image/png","image/gif","image/jpeg","image/webp"])) return $this->respond(ResponseData::fail("檔案格式限制jpg,png,gif,jpeg,webp"));                //刪除原本圖片
-                if( isset($Data["Image".$i]) && $Data["Image".$i]!="" ){
+            if ($file && $file->isFile()) {
+                if ($file->getSizeByUnit('mb')>5) {
+                    return $this->respond(ResponseData::fail("檔案不能超過5MB"));
+                }
+                if (!in_array($file->getMimeType(), ["image/jpg","image/png","image/gif","image/jpeg","image/webp"], true)) {
+                    return $this->respond(ResponseData::fail("檔案格式限制jpg,png,gif,jpeg,webp"));
+                }                //刪除原本圖片
+                if (isset($Data["Image".$i]) && $Data["Image".$i]!="") {
                     $FileHostPath = ROOTPATH."public".$Data["Image".$i];
-                    if(file_exists($FileHostPath))
+                    if (file_exists($FileHostPath)) {
                         unlink($FileHostPath);
+                    }
                 }
                 //產生隨機名稱
                 $name = $file->getRandomName();
@@ -156,12 +174,11 @@ class Discount extends BaseController
                 //更新DB
                 $oDiscount->resetQuery();
                 $oDiscount->protect(false);
-                $oDiscount->update($ID,["Image".$i=>$this->ImageDirPath."/".$name]);
+                $oDiscount->update($ID, ["Image".$i=>$this->ImageDirPath."/".$name]);
             }
         }
         //Res
         $Data = $oDiscount->find($ID);
         return $this->respond(ResponseData::success($Data));
     }
-
 }

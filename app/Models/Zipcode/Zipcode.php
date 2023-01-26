@@ -29,12 +29,11 @@ class Zipcode extends Model
     protected $skipValidation     = false;
 
     //是否離島縣市
-    public function isOutlying(string $CityName):bool
+    public function isOutlying(string $CityName): bool
     {
-        if(in_array($CityName,["南海諸島","澎湖縣","金門縣","連江縣"])){
+        if (in_array($CityName, ["南海諸島","澎湖縣","金門縣","連江縣"], true)) {
             return true;
         }
         return false;
     }
-
 }

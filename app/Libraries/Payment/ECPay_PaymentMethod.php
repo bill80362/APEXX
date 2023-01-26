@@ -11,45 +11,45 @@ namespace App\Libraries\Payment;
 /**
  * 付款方式。
  */
-abstract class ECPay_PaymentMethod {
-
+abstract class ECPay_PaymentMethod
+{
     /**
      * 不指定付款方式。
      */
-    const ALL = 'ALL';
+    public const ALL = 'ALL';
 
     /**
      * 信用卡付費。
      */
-    const Credit = 'Credit';
+    public const Credit = 'Credit';
 
     /**
      * 網路 ATM。
      */
-    const WebATM = 'WebATM';
+    public const WebATM = 'WebATM';
 
     /**
      * 自動櫃員機。
      */
-    const ATM = 'ATM';
+    public const ATM = 'ATM';
 
     /**
      * 超商代碼。
      */
-    const CVS = 'CVS';
+    public const CVS = 'CVS';
 
     /**
      * 超商條碼。
      */
-    const BARCODE = 'BARCODE';
+    public const BARCODE = 'BARCODE';
 
     /**
      * AndroidPay。(同 GooglePay)
      */
-    const AndroidPay = 'GooglePay';
+    public const AndroidPay = 'GooglePay';
 
     /**
      * GooglePay。
      */
-    const GooglePay = 'GooglePay';
+    public const GooglePay = 'GooglePay';
 }

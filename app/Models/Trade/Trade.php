@@ -55,7 +55,7 @@ class Trade extends Model
     ];
     protected $skipValidation     = false;
 
-    static public $Status = [
+    public static $Status = [
         "W"=>"等待回應",
         "P"=>"已付款",
         "T"=>"理貨中",
@@ -66,28 +66,34 @@ class Trade extends Model
     ];
     public $ErrorMessage = "";
     //取消訂單、退回庫存
-    public function cancelAndStockBack($TradeID){
+    public function cancelAndStockBack($TradeID)
+    {
         $this->resetQuery();
         //檢查是否為C
         $TradeData = $this->find($TradeID);
-        if(!$TradeData) { $this->ErrorMessage="訂單編號有誤"; return false; }
-        if($TradeData["Status"]=="C") { $this->ErrorMessage="訂單已取消，不能重複取消"; return false; }
+        if (!$TradeData) {
+            $this->ErrorMessage="訂單編號有誤";
+            return false;
+        }
+        if ($TradeData["Status"]=="C") {
+            $this->ErrorMessage="訂單已取消，不能重複取消";
+            return false;
+        }
         //取消訂單
         $this->protect(false);
-        $this->update($TradeID,[
+        $this->update($TradeID, [
             "Status"=>"C",
         ]);
         $this->protect(true);
         //取消底下子單
         $oSubTrade = new \App\Models\Trade\SubTrade();
-        $oSubTrade->where("TradeID",$TradeID);
+        $oSubTrade->where("TradeID", $TradeID);
         $SubTradeList = $oSubTrade->findAll();
-        if($SubTradeList){
-            $SubTradeIDList = array_column($SubTradeList,"SubTradeID");
+        if ($SubTradeList) {
+            $SubTradeIDList = array_column($SubTradeList, "SubTradeID");
             $oSubTrade->cancelAndStockBack($SubTradeIDList);
         }
         //
         return true;
     }
-
 }

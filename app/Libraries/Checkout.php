@@ -5,7 +5,8 @@ namespace App\Libraries;
 class Checkout
 {
     public $MemberID = 0;
-    public function __construct($MemberID){
+    public function __construct($MemberID)
+    {
         $this->MemberID = $MemberID;
     }
     public $ErrorMessage = "";
@@ -35,7 +36,7 @@ class Checkout
     public $FinalTotal = 0;
     public $FinalTotalOutlying = 0;
 
-    public function cashier(array $GoodsStockArray,$CouponCode,$PaymentID,$ShippingID)
+    public function cashier(array $GoodsStockArray, $CouponCode, $PaymentID, $ShippingID)
     {
         //購物車計算
         $oGoodsStock = new \App\Models\Goods\GoodsStock();
@@ -63,36 +64,36 @@ class Checkout
         $List = $oGoodsStock->findAll();
         //統計每項商品的購買數量
         $moreThanTwo = [];
-        foreach ($GoodsStockArray as $key => $Data){
-            foreach ($List as $key2=>$Data2){//&& $key!=$key2
-                if( $Data["GoodsID"]==$Data2["GoodsID"] && $Data["ColorID"]==$Data2["ColorID"] && $Data["SizeID"]==$Data2["SizeID"]  ){
-                    if( isset($moreThanTwo[$Data["GoodsID"]][$Data["ColorID"]][$Data["SizeID"]]) ){
+        foreach ($GoodsStockArray as $key => $Data) {
+            foreach ($List as $key2=>$Data2) {//&& $key!=$key2
+                if ($Data["GoodsID"]==$Data2["GoodsID"] && $Data["ColorID"]==$Data2["ColorID"] && $Data["SizeID"]==$Data2["SizeID"]) {
+                    if (isset($moreThanTwo[$Data["GoodsID"]][$Data["ColorID"]][$Data["SizeID"]])) {
                         $moreThanTwo[$Data["GoodsID"]][$Data["ColorID"]][$Data["SizeID"]]++;
-                    }
-                    else
+                    } else {
                         $moreThanTwo[$Data["GoodsID"]][$Data["ColorID"]][$Data["SizeID"]] = 1;
+                    }
                 }
             }
         }
         //整理重複商品
         $moreThanTwoList = [];
         foreach ($List as $key => $Data) {
-            if( isset($moreThanTwo[$Data["GoodsID"]][$Data["ColorID"]][$Data["SizeID"]]) ){
+            if (isset($moreThanTwo[$Data["GoodsID"]][$Data["ColorID"]][$Data["SizeID"]])) {
                 $count = $moreThanTwo[$Data["GoodsID"]][$Data["ColorID"]][$Data["SizeID"]];
                 //檢查 重複的數量 <= 庫存
-                if($count > $Data["Stock"]){
+                if ($count > $Data["Stock"]) {
                     $this->ErrorMessage = $Data["Title"] ."_". $Data["ColorTitle"] ."_". $Data["SizeTitle"]  . " 庫存數量不足:".$Data["Stock"];
                     return false;
                 }
                 //購買２個以上的商品，逐次放入$moreThanTwoList
-                for ($i=1;$i<$count;$i++){
+                for ($i=1;$i<$count;$i++) {
                     $moreThanTwoList[] = $Data;
                 }
             }
         }
-        $List = array_merge($moreThanTwoList,$List);//$List會沒有購買２次以上的商品，$moreThanTwoList是兩次以上的商品整理表
-        if(count($GoodsStockArray)!=count($List)){
-            foreach ($GoodsStockArray as $Data){
+        $List = array_merge($moreThanTwoList, $List);//$List會沒有購買２次以上的商品，$moreThanTwoList是兩次以上的商品整理表
+        if (count($GoodsStockArray)!=count($List)) {
+            foreach ($GoodsStockArray as $Data) {
                 //購買商品資訊有誤 查看什麼商品
                 $oGoodsStock = new \App\Models\Goods\GoodsStock();
                 $oGoodsStock->select("GoodsStock.*,Goods.*");
@@ -108,11 +109,10 @@ class Checkout
                 $oGoodsStock->where("GoodsStock.SizeID", $Data["SizeID"]);
                 $Temp = $oGoodsStock->first();
                 //
-                if(!$Temp){
+                if (!$Temp) {
                     $this->ErrorMessage = "購買商品資訊有誤(".$Data["GoodsID"].",".$Data["ColorID"].",".$Data["SizeID"].")";
                     return false;
                 }
-
             }
         }
         //初始化
@@ -135,7 +135,7 @@ class Checkout
             }
             //檢查商品是否有設定銷售時間，如果有，是否有超出銷售時間要擋下
             if ($Data["GoodsTimeStart"] && $Data["GoodsTimeEnd"]) {
-                if( !(strtotime($Data["GoodsTimeStart"])< time() && time() > strtotime($Data["GoodsTimeEnd"])) ){
+                if (!(strtotime($Data["GoodsTimeStart"])< time() && time() > strtotime($Data["GoodsTimeEnd"]))) {
                     $this->ErrorMessage = $Data["Title"] . " 商品超出銷售時間限制";
                     return false;
                 }
@@ -160,21 +160,24 @@ class Checkout
         $oDiscount->where("StartTime <=", date("Y-m-d H:i:s"));
         $oDiscount->where("EndTime >=", date("Y-m-d H:i:s"));
         //優惠限定會員
-        if (!$this->MemberID)
+        if (!$this->MemberID) {
             $oDiscount->where("LimitMember", "N");
+        }
         //
         $oDiscount->orderBy("Threshold", "DESC");
         $DiscountList = $oDiscount->findAll();
         $MenuIDKeyValue = [];
-        if($DiscountList){
-            $MenuIDArray = array_column($DiscountList,"MenuID");
+        if ($DiscountList) {
+            $MenuIDArray = array_column($DiscountList, "MenuID");
 //            $MenuIDArray = \App\Libraries\Tools\DatabaseTools::ListToKV($DiscountList, "MenuID");
             //優惠包含的商品ID
             $oMenu2Goods = new \App\Models\Menu2Goods\Menu2Goods();
             $oMenu2Goods->whereIn("MenuID", $MenuIDArray);
             $Temp = $oMenu2Goods->findAll();
             foreach ($Temp as $Data) {
-                if (!isset($MenuIDKeyValue[$Data["MenuID"]])) $MenuIDKeyValue[$Data["MenuID"]] = [];
+                if (!isset($MenuIDKeyValue[$Data["MenuID"]])) {
+                    $MenuIDKeyValue[$Data["MenuID"]] = [];
+                }
                 $MenuIDKeyValue[$Data["MenuID"]][] = $Data["GoodsID"];
             }
         }
@@ -188,7 +191,7 @@ class Checkout
         foreach ($DiscountList as $key => $Data) {
             if ($Data["MenuID"]) {
                 foreach ($List as $ShopCartData) {
-                    if (in_array($ShopCartData["GoodsID"], $Data["GoodsIDArray"])) {
+                    if (in_array($ShopCartData["GoodsID"], $Data["GoodsIDArray"], true)) {
                         $DiscountList[$key]["CheckoutPrice"] = $DiscountList[$key]["CheckoutPrice"]??0;
                         $DiscountList[$key]["CheckoutPrice"] += $ShopCartData["SellPrice"];
                     }
@@ -200,10 +203,10 @@ class Checkout
         foreach ($List as $key => $ShopCartData) {
             foreach ($DiscountList as $DiscountData) {
                 //該商品是否有在分類折扣中
-                if(in_array($List[$key]["GoodsID"],$DiscountData["GoodsIDArray"])){
+                if (in_array($List[$key]["GoodsID"], $DiscountData["GoodsIDArray"], true)) {
                     //打折優惠、群組優惠、統計金額有過門檻
                     if ($DiscountData["DiscountType"] == "P" && $DiscountData["MenuID"] && $DiscountData["CheckoutPrice"] >= $DiscountData["Threshold"]) {
-                        if ($DiscountData["DiscountPercent"] < $List[$key]["DiscountPercentMenu"]){
+                        if ($DiscountData["DiscountPercent"] < $List[$key]["DiscountPercentMenu"]) {
                             $List[$key]["DiscountPercentMenu"] = $DiscountData["DiscountPercent"];//群組折扣
 //                        $List[$key]["DiscountID_PercentMenu"] = $DiscountData["DiscountID"];//使用的優惠ID
                             $List[$key]["DiscountPercentMenuInfo"] = $DiscountData;
@@ -218,7 +221,7 @@ class Checkout
         foreach ($DiscountList as $key => $Data) {
             //優惠有指定商品分類，統計該分類金額
             foreach ($List as $ShopCartData) {
-                if (in_array($ShopCartData["GoodsID"], $Data["GoodsIDArray"])) {
+                if (in_array($ShopCartData["GoodsID"], $Data["GoodsIDArray"], true)) {
                     $DiscountList[$key]["CheckoutPrice"] = $this->DiscountMenuTotal;
                 }
             }
@@ -229,12 +232,11 @@ class Checkout
             foreach ($DiscountList as $DiscountData) {
                 //打折優惠、全館優惠、統計金額有過門檻
                 if ($DiscountData["DiscountType"] == "P" && !$DiscountData["MenuID"] && $DiscountData["CheckoutPrice"] >= $DiscountData["Threshold"]) {
-                    if ($DiscountData["DiscountPercent"] < $List[$key]["DiscountPercentFull"]){
+                    if ($DiscountData["DiscountPercent"] < $List[$key]["DiscountPercentFull"]) {
                         $List[$key]["DiscountPercentFull"] = $DiscountData["DiscountPercent"];//折扣
 //                        $List[$key]["DiscountID_PercentFull"] = $DiscountData["DiscountID"];//使用的優惠ID
                         $List[$key]["DiscountPercentFullInfo"] = $DiscountData;//使用的優惠ID
                     }
-
                 }
             }
             //打折優惠結算金額 售價x分類打折x全館打折 (打折會堆疊)
@@ -243,7 +245,7 @@ class Checkout
         }
         /**現金折抵優惠券**/
         $this->CouponInfo = [];
-        if($CouponCode){
+        if ($CouponCode) {
             $oCoupon = new \App\Models\Coupon\Coupon();
             $oCoupon->select("Coupon.*");
             $oCoupon->where("Status", "Y");
@@ -253,22 +255,22 @@ class Checkout
             $oCoupon->where("Threshold <=", $this->DiscountFullTotal);
             $oCoupon->where("CouponCount >", "0");
             //沒有會員ID 則只抓沒限定會員
-            if (!$this->MemberID){
+            if (!$this->MemberID) {
                 $oCoupon->where("LimitMember", "N");
             } else {
                 //有會員ID
-                $oCoupon->join("Coupon2Member","Coupon2Member.CouponID=Coupon.CouponID","left");
+                $oCoupon->join("Coupon2Member", "Coupon2Member.CouponID=Coupon.CouponID", "left");
                 $oCoupon->groupStart();
                 $oCoupon->groupStart();
                 $oCoupon->where("LimitMember", "Y");
-                $oCoupon->where("MemberID",$this->MemberID);
+                $oCoupon->where("MemberID", $this->MemberID);
                 $oCoupon->groupEnd();
                 $oCoupon->orWhere("OnlyMember", "N");
                 $oCoupon->groupEnd();
             }
             $oCoupon->groupBy("Coupon.CouponID");
             $CouponInfo = $oCoupon->first();
-            if(!$CouponInfo){
+            if (!$CouponInfo) {
                 $this->ErrorMessage = "現金折抵優惠券錯誤";
                 return false;
             }
@@ -298,20 +300,22 @@ class Checkout
             $List[$key]["RefundPrice"] = $List[$key]["DiscountPrice"];
         }
         $i=0;
-        while ($CouponMoneyAvg>0){
+        while ($CouponMoneyAvg>0) {
             $List[$i]["RefundPrice"]++;
             $CouponMoneyAvg--;
             $i++;
-            if($i==count($List)) $i=0;
+            if ($i==count($List)) {
+                $i=0;
+            }
         }
         /**金流**/
         $this->PaymentInfo = [];
         $this->PaymentSubtotalFee = 0;//金流額外費用
-        if($PaymentID){
+        if ($PaymentID) {
             $oPayment = new \App\Models\Payment\Payment();
-            $oPayment->where("Status","Y");
+            $oPayment->where("Status", "Y");
             $this->PaymentInfo = $oPayment->find($PaymentID);
-            if(!$this->PaymentInfo){
+            if (!$this->PaymentInfo) {
                 $this->ErrorMessage = "金流選項錯誤";
                 return false;
             }
@@ -319,9 +323,9 @@ class Checkout
             $ChargeFee = $this->PaymentInfo["ChargeFee"]??0;
             $this->PaymentSubtotalFee = $this->AfterCouponTotal * $PaymentChargePercent / 100 + $ChargeFee;
             //金流方式 有限制不能寄送低溫包裹
-            if($this->PaymentInfo["DeliveryFrozen"]=="N"){
+            if ($this->PaymentInfo["DeliveryFrozen"]=="N") {
                 foreach ($List as $key => $Data) {
-                    if($Data["DeliveryFrozen"]=="Y"){
+                    if ($Data["DeliveryFrozen"]=="Y") {
                         $this->ErrorMessage = "[".$Data["Title"]."]為低溫包裹無法使用此金流方式";
                         return false;
                     }
@@ -330,30 +334,30 @@ class Checkout
         }
         /**物流**/
         $this->ShippingInfo = [];
-        if($ShippingID){
+        if ($ShippingID) {
             $oShipping = new \App\Models\Shipping\Shipping();
-            $oShipping->where("Status","Y");
+            $oShipping->where("Status", "Y");
             $this->ShippingInfo = $oShipping->find($ShippingID);
-            if(!$this->ShippingInfo){
+            if (!$this->ShippingInfo) {
                 $this->ErrorMessage = "物流選項錯誤";
                 return false;
             }
             //檢查商品總體積是否超過
             $DeliverVolumeMax = $this->ShippingInfo["DeliverVolumeMax"]??0;
-            if($this->TotalDeliverVolume > $DeliverVolumeMax){
+            if ($this->TotalDeliverVolume > $DeliverVolumeMax) {
                 $this->ErrorMessage = "商品總體積(".$this->TotalDeliverVolume.")超過物流限制(".$DeliverVolumeMax.")";
                 return false;
             }
             //檢查商品總重量是否超過
             $DeliverWeightMax = $this->ShippingInfo["DeliverWeightMax"]??0;
-            if($this->TotalDeliverWeight > $DeliverWeightMax){
+            if ($this->TotalDeliverWeight > $DeliverWeightMax) {
                 $this->ErrorMessage = "商品總重量(".$this->TotalDeliverWeight.")超過物流限制(".$DeliverWeightMax.")";
                 return false;
             }
             //物流方式 有限制不能寄送低溫包裹
-            if($this->ShippingInfo["DeliveryFrozen"]=="N"){
+            if ($this->ShippingInfo["DeliveryFrozen"]=="N") {
                 foreach ($List as $key => $Data) {
-                    if($Data["DeliveryFrozen"]=="Y"){
+                    if ($Data["DeliveryFrozen"]=="Y") {
                         $this->ErrorMessage = "[".$Data["Title"]."]為低溫包裹無法使用此金流方式";
                         return false;
                     }
@@ -365,19 +369,19 @@ class Checkout
             $this->ShippingStatusOutlying = $this->ShippingInfo["StatusOutlying"]??"N";//海外是否可以使用
         }
         /**金流vs物流 綁再一起的檢查**/
-        if( $this->PaymentInfo && $this->ShippingInfo ){
-            if( in_array($this->PaymentInfo["PaymentType"],["FAMIC2C","UNIMARTC2C"]) ){
-                if($this->ShippingInfo["ShippingType"]!=$this->PaymentInfo["PaymentType"]){
+        if ($this->PaymentInfo && $this->ShippingInfo) {
+            if (in_array($this->PaymentInfo["PaymentType"], ["FAMIC2C","UNIMARTC2C"], true)) {
+                if ($this->ShippingInfo["ShippingType"]!=$this->PaymentInfo["PaymentType"]) {
                     $this->ErrorMessage = "貨到付款金物流方式為固定選項";
                     return false;
                 }
             }
         }
         /**最後費用計算**/
-        if($this->ShippingFree){
+        if ($this->ShippingFree) {
             $this->FinalTotal = $this->AfterCouponTotal + $this->PaymentSubtotalFee;
             $this->FinalTotalOutlying = $this->FinalTotal;
-        }else{
+        } else {
             $this->FinalTotal = $this->AfterCouponTotal + $this->PaymentSubtotalFee + $this->ShippingFee;
             $this->FinalTotalOutlying = $this->AfterCouponTotal + $this->PaymentSubtotalFee + $this->ShippingFeeOutlying;
         }
@@ -385,5 +389,4 @@ class Checkout
         $this->CheckoutList = $List;
         return $List;
     }
-
 }

@@ -2,6 +2,7 @@
 /**
  * https://github.com/PHPMailer/PHPMailer
  **/
+
 namespace App\Libraries\Tools;
 
 class Mail

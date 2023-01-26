@@ -78,11 +78,11 @@ $routes->post('/contactUs', 'Front\ContactUs::send');
 $routes->get('/homepage', 'Front\Homepage::getList');
 
 /**管理端-登入***/
-$routes->group('admin', [] , function ($routes) {
+$routes->group('admin', [], function ($routes) {
     $routes->post('login', 'Admin\Login::login');
 });
 /**管理端***/
-$routes->group('admin', ["filter"=>"AdminAuth"] , function ($routes) {
+$routes->group('admin', ["filter"=>"AdminAuth"], function ($routes) {
     //登出
     $routes->get('logout', 'Admin\Login::logout');
     //通用欄位
@@ -242,12 +242,12 @@ $routes->group('admin', ["filter"=>"AdminAuth"] , function ($routes) {
     $routes->get('member', 'Admin\Member\Member::getList');
 });
 /**會員端***/
-$routes->group('member', [] , function ($routes) {
+$routes->group('member', [], function ($routes) {
     $routes->post('login', 'Member\Login::login');
     $routes->post('register', 'Member\Login::register');
     $routes->post('forgetPassword', 'Member\Login::forgetPassword');
 });
-$routes->group('member', ["filter"=>"MemberAuth"] , function ($routes) {
+$routes->group('member', ["filter"=>"MemberAuth"], function ($routes) {
     //myInfo
     $routes->get('my', 'Member\Member::getMy');
     $routes->post('my', 'Member\Member::updateMy');
@@ -285,7 +285,7 @@ $routes->post('nonMember/checkout', 'Member\Checkout::checkout');
 $routes->post('nonMember/trade', 'Front\NonMember::getTrade');
 
 /**第三方回覆***/
-$routes->group('ECPay', [] , function ($routes) {
+$routes->group('ECPay', [], function ($routes) {
     $routes->post('notify/ServerReplyAIO', 'ECReply::getAIO');
     $routes->post('notify/ServerReplyLogistics', 'ECReply::getLogistics');
     $routes->post('map/redirect', 'ECReply::redirectMapInfo');

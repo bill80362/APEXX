@@ -64,24 +64,24 @@ class GoodsStock extends Model
     protected $skipValidation     = false;
 
     //增減庫存
-    public function ioStock(int $GoodsID,int $ColorID,int $SizeID,int $fixCount){
+    public function ioStock(int $GoodsID, int $ColorID, int $SizeID, int $fixCount)
+    {
         $this->protect(false);
         $this->resetQuery();
         //增加或是減少
-        if($fixCount==0){
+        if ($fixCount==0) {
             return true;
-        }elseif($fixCount>0){
-            $this->set("Stock","Stock+".abs($fixCount),false);
-        }elseif($fixCount<0){
-            $this->set("Stock","Stock-".abs($fixCount),false);
+        } elseif ($fixCount>0) {
+            $this->set("Stock", "Stock+".abs($fixCount), false);
+        } elseif ($fixCount<0) {
+            $this->set("Stock", "Stock-".abs($fixCount), false);
         }
         //
-        $this->where("GoodsID",$GoodsID);
-        $this->where("ColorID",$ColorID);
-        $this->where("SizeID",$SizeID);
+        $this->where("GoodsID", $GoodsID);
+        $this->where("ColorID", $ColorID);
+        $this->where("SizeID", $SizeID);
         $this->update();
         $this->protect(true);
         return true;
     }
-
 }

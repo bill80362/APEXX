@@ -9,7 +9,8 @@ use CodeIgniter\API\ResponseTrait;
 class Member extends BaseController
 {
     use ResponseTrait;
-    public function getList(){
+    public function getList()
+    {
         //Filter
 
         //
@@ -20,12 +21,11 @@ class Member extends BaseController
         //Filter
 
         //
-        $oMember->orderBy("MemberID","DESC");
+        $oMember->orderBy("MemberID", "DESC");
         $Count = $oMember->countAllResults(false);
-        $List = $oMember->paginate($PageLimit,"",$Page);
+        $List = $oMember->paginate($PageLimit, "", $Page);
         //
-        foreach ($List as $key => $Data){
-
+        foreach ($List as $key => $Data) {
         }
 
         //Res
@@ -35,5 +35,4 @@ class Member extends BaseController
         ];
         return $this->respond(ResponseData::success($ResData));
     }
-    
 }

@@ -8,18 +8,20 @@ use CodeIgniter\API\ResponseTrait;
 
 class Advertisement extends BaseController
 {
-    public $ImageDirPath = "/image/advertisement";
     use ResponseTrait;
-    public function getList(){
+    public $ImageDirPath = "/image/advertisement";
+    public function getList()
+    {
         //
         $oAdvertisement = new \App\Models\Advertisement\Advertisement();
         $oAdvertisement->orderBy("Seq");
-        $oAdvertisement->orderBy("AdvertisementID","DESC");
+        $oAdvertisement->orderBy("AdvertisementID", "DESC");
         $List = $oAdvertisement->findAll();
         //Res
         return $this->respond(ResponseData::success($List));
     }
-    public function create(){
+    public function create()
+    {
         //
         $CategoryID = $this->request->getVar("CategoryID");
         $Title = $this->request->getVar("Title");
@@ -28,7 +30,9 @@ class Advertisement extends BaseController
         //檢查目錄ID
         $oCategory = new \App\Models\Advertisement\Category();
         $Data = $oCategory->find($CategoryID);
-        if(!$Data) return $this->respond(ResponseData::fail("目錄ID有誤"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("目錄ID有誤"));
+        }
         //
         $oAdvertisement = new \App\Models\Advertisement\Advertisement();
         $oAdvertisement->protect(false);
@@ -38,15 +42,16 @@ class Advertisement extends BaseController
             "Content"=>$Content,
             "Seq"=>$Seq,
         ]);
-        if($oAdvertisement->errors()){
-            $ErrorMsg = implode(",",$oAdvertisement->errors());
+        if ($oAdvertisement->errors()) {
+            $ErrorMsg = implode(",", $oAdvertisement->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oAdvertisement->find($AdvertisementID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function update(){
+    public function update()
+    {
         //
         $ID = $this->request->getVar("ID");
         $Title = $this->request->getVar("Title");
@@ -56,53 +61,66 @@ class Advertisement extends BaseController
         $oAdvertisement = new \App\Models\Advertisement\Advertisement();
         //檢查ID
         $Data = $oAdvertisement->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //開始更新
         $oAdvertisement->protect(false);
-        $oAdvertisement->update($ID,[
+        $oAdvertisement->update($ID, [
             "Title"=>$Title,
             "Content"=>$Content,
             "Seq"=>$Seq,
         ]);
-        if($oAdvertisement->errors()){
-            $ErrorMsg = implode(",",$oAdvertisement->errors());
+        if ($oAdvertisement->errors()) {
+            $ErrorMsg = implode(",", $oAdvertisement->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oAdvertisement->find($ID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function del($ID){
+    public function del($ID)
+    {
         //
         $oAdvertisement = new \App\Models\Advertisement\Advertisement();
         //檢查ID
         $Data = $oAdvertisement->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //開始刪除
         $oAdvertisement->protect(false);
         $oAdvertisement->delete($ID);
-        if($oAdvertisement->errors()){
-            $ErrorMsg = implode(",",$oAdvertisement->errors());
+        if ($oAdvertisement->errors()) {
+            $ErrorMsg = implode(",", $oAdvertisement->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         return $this->respond(ResponseData::success([]));
     }
-    public function uploadImage($ID){
+    public function uploadImage($ID)
+    {
         $oAdvertisement = new \App\Models\Advertisement\Advertisement();
         //檢查ID
         $Data = $oAdvertisement->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //上傳圖片 Image 多張
-        for ($i=1;$i<=1;$i++){
+        for ($i=1;$i<=1;$i++) {
             $file = $this->request->getFile('Image'.$i);
-            if ( $file && $file->isFile()) {
-                if($file->getSizeByUnit('mb')>5) return $this->respond(ResponseData::fail("檔案不能超過5MB"));
-                if(!in_array($file->getMimeType(),["image/jpg","image/png","image/gif","image/jpeg","image/webp"])) return $this->respond(ResponseData::fail("檔案格式限制jpg,png,gif,jpeg,webp"));                //刪除原本圖片
-                if( isset($Data["Image".$i]) && $Data["Image".$i]!="" ){
+            if ($file && $file->isFile()) {
+                if ($file->getSizeByUnit('mb')>5) {
+                    return $this->respond(ResponseData::fail("檔案不能超過5MB"));
+                }
+                if (!in_array($file->getMimeType(), ["image/jpg","image/png","image/gif","image/jpeg","image/webp"], true)) {
+                    return $this->respond(ResponseData::fail("檔案格式限制jpg,png,gif,jpeg,webp"));
+                }                //刪除原本圖片
+                if (isset($Data["Image".$i]) && $Data["Image".$i]!="") {
                     $FileHostPath = ROOTPATH."public".$Data["Image".$i];
-                    if(file_exists($FileHostPath))
+                    if (file_exists($FileHostPath)) {
                         unlink($FileHostPath);
+                    }
                 }
                 //產生隨機名稱
                 $name = $file->getRandomName();
@@ -111,21 +129,24 @@ class Advertisement extends BaseController
                 //更新DB
                 $oAdvertisement->resetQuery();
                 $oAdvertisement->protect(false);
-                $oAdvertisement->update($ID,["Image".$i=>$this->ImageDirPath."/".$name]);
+                $oAdvertisement->update($ID, ["Image".$i=>$this->ImageDirPath."/".$name]);
             }
         }
         //Res
         $Data = $oAdvertisement->find($ID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function updateSeqBatch(){
+    public function updateSeqBatch()
+    {
         $SeqArray = $this->request->getVar();
-        if(!is_array($SeqArray)) return $this->respond(ResponseData::fail("資料須為陣列"));
+        if (!is_array($SeqArray)) {
+            return $this->respond(ResponseData::fail("資料須為陣列"));
+        }
         //更新排序
         $oAdvertisement = new \App\Models\Advertisement\Advertisement();
         $oAdvertisement->protect(false);
-        foreach ($SeqArray as $key=>$Data){
-            $oAdvertisement->update($Data->ID,["Seq"=>$Data->Seq]);
+        foreach ($SeqArray as $key=>$Data) {
+            $oAdvertisement->update($Data->ID, ["Seq"=>$Data->Seq]);
         }
         //Res
         return $this->respond(ResponseData::success([]));

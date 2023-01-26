@@ -8,12 +8,13 @@ use CodeIgniter\API\ResponseTrait;
 class LineReply extends BaseController
 {
     use ResponseTrait;
-    public function reply(){
+    public function reply()
+    {
         //Log
         $oECReply = new \App\Models\ECReply\ECReply();
         $oECReply->protect(false);
         $oECReply->insert([
-            "PostData"=>print_r($this->request->getGet("transactionId"),true),
+            "PostData"=>print_r($this->request->getGet("transactionId"), true),
         ]);
         //
         $transactionId = $this->request->getGet("transactionId");
@@ -21,7 +22,10 @@ class LineReply extends BaseController
         $oLibLinePay = new \App\Libraries\Payment\LinePay();
         $rs = $oLibLinePay->returnSuccess($transactionId);
         //
-        if(!$rs) return $this->respond(ResponseData::fail($oLibLinePay->ErrorMessage));
-        else return $this->respond(ResponseData::success($oLibLinePay->TradeData));
+        if (!$rs) {
+            return $this->respond(ResponseData::fail($oLibLinePay->ErrorMessage));
+        } else {
+            return $this->respond(ResponseData::success($oLibLinePay->TradeData));
+        }
     }
 }

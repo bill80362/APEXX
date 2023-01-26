@@ -24,7 +24,6 @@ class Goods extends BaseController
             if ($Temp) {
                 $FilterGoodsIDArray = array_column($Temp, "GoodsID");
             }
-
         }
         //
         $oGoods = new \App\Models\Goods\Goods();
@@ -58,7 +57,6 @@ class Goods extends BaseController
             if (count($Temp) > 0) {
                 $Menu2GoodsKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
             }
-
         }
         //關聯庫存
         $GoodsStockKeyValue = [];
@@ -74,7 +72,6 @@ class Goods extends BaseController
             if (count($Temp) > 0) {
                 $GoodsStockKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
             }
-
         }
         //關聯圖片
 //        $GoodsPictureKeyValue = [];

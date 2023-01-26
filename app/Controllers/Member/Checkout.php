@@ -12,7 +12,8 @@ class Checkout extends BaseController
 {
     use ResponseTrait;
     //地圖
-    public function get711Map(){
+    public function get711Map()
+    {
         $oLibECPay = new \App\Libraries\Payment\ECPay();
         $PaymentHTML = $oLibECPay->getCvsMap("UNIMARTC2C");
         //
@@ -21,7 +22,8 @@ class Checkout extends BaseController
         ];
         return $this->respond(ResponseData::success($ResData));
     }
-    public function getFamilyMap(){
+    public function getFamilyMap()
+    {
         $oLibECPay = new \App\Libraries\Payment\ECPay();
         $PaymentHTML = $oLibECPay->getCvsMap("FAMIC2C");
         //
@@ -31,11 +33,12 @@ class Checkout extends BaseController
         return $this->respond(ResponseData::success($ResData));
     }
     //收銀台 計算訂單
-    public function cashier(){
+    public function cashier()
+    {
         $CouponCode = $this->request->getVar("CouponCode");//折扣碼
         $PaymentID = $this->request->getVar("PaymentID");//金流
         $ShippingID = $this->request->getVar("ShippingID");//物流
-        $ShoppingCart = $this->request->getJsonVar("ShoppingCart",true);//購物車
+        $ShoppingCart = $this->request->getJsonVar("ShoppingCart", true);//購物車
         //取得登入身份
         $LoginMemberID = \Config\Services::getLoginMember()->getID();
         //購物車計算
@@ -44,8 +47,10 @@ class Checkout extends BaseController
 //        $ShopCartList = $oShoppingCart->findAll();
         //
         $oLibCheckout = new \App\Libraries\Checkout($LoginMemberID);
-        $CheckoutList = $oLibCheckout->cashier($ShoppingCart,$CouponCode,$PaymentID,$ShippingID);
-        if(!$CheckoutList) return $this->respond(ResponseData::fail($oLibCheckout->ErrorMessage));
+        $CheckoutList = $oLibCheckout->cashier($ShoppingCart, $CouponCode, $PaymentID, $ShippingID);
+        if (!$CheckoutList) {
+            return $this->respond(ResponseData::fail($oLibCheckout->ErrorMessage));
+        }
         //Res
         $ResData = [
             //優惠
@@ -73,14 +78,15 @@ class Checkout extends BaseController
         return $this->respond(ResponseData::success($ResData));
     }
     //產生訂單
-    public function checkout(){
+    public function checkout()
+    {
         //街口支付和LinePay
         $Device = $this->request->getVar("Device");//折扣碼
         //結帳購物車
         $CouponCode = $this->request->getVar("CouponCode");//折扣碼
         $PaymentID = $this->request->getVar("PaymentID");//金流
         $ShippingID = $this->request->getVar("ShippingID");//物流
-        $ShoppingCart = $this->request->getJsonVar("ShoppingCart",true);//購物車
+        $ShoppingCart = $this->request->getJsonVar("ShoppingCart", true);//購物車
         //收件人資訊
         $ReceiverName = $this->request->getVar("ReceiverName");//姓名
         $ReceiverPhone = $this->request->getVar("ReceiverPhone");//電話
@@ -97,18 +103,22 @@ class Checkout extends BaseController
         $LoginMemberID = \Config\Services::getLoginMember()->getID();
         //收銀台
         $oLibCheckout = new \App\Libraries\Checkout($LoginMemberID);
-        $CheckoutList = $oLibCheckout->cashier($ShoppingCart,$CouponCode,$PaymentID,$ShippingID);
-        if(!$CheckoutList) return $this->respond(ResponseData::fail($oLibCheckout->ErrorMessage));
+        $CheckoutList = $oLibCheckout->cashier($ShoppingCart, $CouponCode, $PaymentID, $ShippingID);
+        if (!$CheckoutList) {
+            return $this->respond(ResponseData::fail($oLibCheckout->ErrorMessage));
+        }
         //根據郵遞區號，判斷是否外縣市
         $oZipcode = new \App\Models\Zipcode\Zipcode();
-        $oZipcode->where("Zipcode",$ReceiverAddressCode);
+        $oZipcode->where("Zipcode", $ReceiverAddressCode);
         $ZipcodeData = $oZipcode->first();
-        if(!$ZipcodeData) return $this->respond(ResponseData::fail("郵遞區號錯誤"));
+        if (!$ZipcodeData) {
+            return $this->respond(ResponseData::fail("郵遞區號錯誤"));
+        }
         $isOutlying = $oZipcode->isOutlying($ZipcodeData["City"]);
         //判斷離島縣市運費
-        if($isOutlying){
+        if ($isOutlying) {
             $TradePrice = $oLibCheckout->FinalTotalOutlying;
-        }else{
+        } else {
             $TradePrice = $oLibCheckout->FinalTotal;
         }
         //建立訂單
@@ -130,7 +140,7 @@ class Checkout extends BaseController
             "GiveImage"=>$oLibCheckout->GiveInfo["Image1"]??"",
             //免運
             "DiscountID_D"=>$oLibCheckout->DiscountID_ShippingFree,
-            "ShippingFree"=>$oLibCheckout->ShippingFree?"Y":"N",
+            "ShippingFree"=>$oLibCheckout->ShippingFree ? "Y" : "N",
             //價格
             "Price"=>$TradePrice,
             //收件人資訊
@@ -149,13 +159,13 @@ class Checkout extends BaseController
         $oTrade = new \App\Models\Trade\Trade();
         $oTrade->protect(false);
         $TradeInsertData["TradeID"] = $oTrade->insert($TradeInsertData);
-        if($oTrade->errors()){
-            $ErrorMsg = implode(",",$oTrade->errors());
+        if ($oTrade->errors()) {
+            $ErrorMsg = implode(",", $oTrade->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //建立子單
         $SubTradeInsertList = [];
-        foreach ($CheckoutList as $Data){
+        foreach ($CheckoutList as $Data) {
             $SubTradeInsertList[] = [
                 "TradeID"=>$TradeInsertData["TradeID"],
                 "Status"=>"Y",
@@ -176,39 +186,39 @@ class Checkout extends BaseController
         $oSubTrade = new \App\Models\Trade\SubTrade();
         $oSubTrade->protect(false);
         $oSubTrade->insertBatch($SubTradeInsertList);
-        if($oSubTrade->errors()){
-            $ErrorMsg = implode(",",$oSubTrade->errors());
+        if ($oSubTrade->errors()) {
+            $ErrorMsg = implode(",", $oSubTrade->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //訂單建立成功，清除購物車
         $oShoppingCart = new \App\Models\ShoppingCart\ShoppingCart();
         $oShoppingCart->protect(false);
-        foreach ($CheckoutList as $Data){
+        foreach ($CheckoutList as $Data) {
             $oShoppingCart->resetQuery();
-            $oShoppingCart->where("MemberID",$LoginMemberID);
-            $oShoppingCart->where("GoodsID",$Data["GoodsID"]);
-            $oShoppingCart->where("ColorID",$Data["ColorID"]);
-            $oShoppingCart->where("SizeID",$Data["SizeID"]);
+            $oShoppingCart->where("MemberID", $LoginMemberID);
+            $oShoppingCart->where("GoodsID", $Data["GoodsID"]);
+            $oShoppingCart->where("ColorID", $Data["ColorID"]);
+            $oShoppingCart->where("SizeID", $Data["SizeID"]);
             $oShoppingCart->delete();
         }
         //扣商品庫存
         $oGoodsStock = new \App\Models\Goods\GoodsStock();
         $oGoodsStock->protect(false);
-        foreach ($CheckoutList as $Data){
-            $oGoodsStock->ioStock($Data["GoodsID"],$Data["ColorID"],$Data["SizeID"],"-1");
+        foreach ($CheckoutList as $Data) {
+            $oGoodsStock->ioStock($Data["GoodsID"], $Data["ColorID"], $Data["SizeID"], "-1");
         }
         //扣折扣碼使用量
         $useCouponID = $oLibCheckout->CouponInfo["CouponID"]??0;
-        if($useCouponID){
+        if ($useCouponID) {
             $oCoupon = new \App\Models\Coupon\Coupon();
             $oCoupon->protect(false);
-            $oCoupon->ioCount($useCouponID,"-1");
+            $oCoupon->ioCount($useCouponID, "-1");
         }
         //整理金流 回傳的連結 更改特定貨到付款方式的訂單Status
         $oLibPayment = new \App\Libraries\Payment\Payment();
         try {
-            $PaymentHTML = $oLibPayment->getLinkHTML($TradeInsertData,$Device);
-        }catch (\Exception $e){
+            $PaymentHTML = $oLibPayment->getLinkHTML($TradeInsertData, $Device);
+        } catch (\Exception $e) {
             //金流網址取得失敗，取消訂單，返回庫存
             $oTrade = new \App\Models\Trade\Trade();
             $oTrade->cancelAndStockBack($TradeInsertData["TradeID"]);
@@ -230,5 +240,4 @@ class Checkout extends BaseController
         ];
         return $this->respond(ResponseData::success($ResData));
     }
-
 }

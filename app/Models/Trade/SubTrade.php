@@ -23,7 +23,7 @@ class SubTrade extends Model
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
 
-    static public $Status = [
+    public static $Status = [
         "Y"=>"正常",
         "F"=>"退貨",
     ];
@@ -50,25 +50,27 @@ class SubTrade extends Model
     protected $skipValidation     = false;
 
     //取消子單並退回庫存量
-    public function cancelAndStockBack(array $SubTradeIDArray){
-        if(count($SubTradeIDArray)==0) return false;
+    public function cancelAndStockBack(array $SubTradeIDArray)
+    {
+        if (count($SubTradeIDArray)==0) {
+            return false;
+        }
         $this->resetQuery();
         $this->protect(false);
-        $this->whereIn("SubTradeID",$SubTradeIDArray);
-        $this->where("Status","Y");//只抓沒退貨的
+        $this->whereIn("SubTradeID", $SubTradeIDArray);
+        $this->where("Status", "Y");//只抓沒退貨的
         $List = $this->findAll();
         $oGoodsStock = new \App\Models\Goods\GoodsStock();
-        foreach ($List as $Data){
+        foreach ($List as $Data) {
             $this->resetQuery();
-            $this->update($Data["SubTradeID"],[
+            $this->update($Data["SubTradeID"], [
                 "Status"=>"F",//狀態改成已退貨
             ]);
             //返回庫存
             $oGoodsStock->resetQuery();
-            $oGoodsStock->ioStock($Data["GoodsID"],$Data["ColorID"],$Data["SizeID"],"1");
+            $oGoodsStock->ioStock($Data["GoodsID"], $Data["ColorID"], $Data["SizeID"], "1");
         }
         $this->protect(true);
         return true;
     }
-
 }

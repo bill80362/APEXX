@@ -9,15 +9,17 @@ use CodeIgniter\API\ResponseTrait;
 class Color extends BaseController
 {
     use ResponseTrait;
-    public function getList(){
+    public function getList()
+    {
         //
         $oColor = new \App\Models\Color\Color();
-        $oColor->orderBy("ColorID","DESC");
+        $oColor->orderBy("ColorID", "DESC");
         $List = $oColor->findAll();
         //Res
         return $this->respond(ResponseData::success($List));
     }
-    public function create(){
+    public function create()
+    {
         //
         $ColorTitle = $this->request->getVar("ColorTitle");
         $GoodsID = $this->request->getVar("GoodsID");
@@ -30,15 +32,16 @@ class Color extends BaseController
             "GoodsID"=>$GoodsID,
             "Status"=>$Status,
         ]);
-        if($oColor->errors()){
-            $ErrorMsg = implode(",",$oColor->errors());
+        if ($oColor->errors()) {
+            $ErrorMsg = implode(",", $oColor->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oColor->find($ColorID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function update(){
+    public function update()
+    {
         //
         $ID = $this->request->getVar("ID");
         $ColorTitle = $this->request->getVar("ColorTitle");
@@ -48,7 +51,9 @@ class Color extends BaseController
         $oColor = new \App\Models\Color\Color();
         //檢查ID
         $Data = $oColor->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //開始更新
         $oColor->protect(false);
         $updateData = [
@@ -56,26 +61,29 @@ class Color extends BaseController
             "GoodsID"=>$GoodsID,
             "Status"=>$Status,
         ];
-        $oColor->update($ID,$updateData);
-        if($oColor->errors()){
-            $ErrorMsg = implode(",",$oColor->errors());
+        $oColor->update($ID, $updateData);
+        if ($oColor->errors()) {
+            $ErrorMsg = implode(",", $oColor->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oColor->find($ID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function del($ID){
+    public function del($ID)
+    {
         //
         $oColor = new \App\Models\Color\Color();
         //檢查ID
         $Data = $oColor->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //刪除DB
         $oColor->protect(false);
         $oColor->delete($ID);
-        if($oColor->errors()){
-            $ErrorMsg = implode(",",$oColor->errors());
+        if ($oColor->errors()) {
+            $ErrorMsg = implode(",", $oColor->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res

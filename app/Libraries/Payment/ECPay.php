@@ -12,6 +12,7 @@ use Ecpay\Sdk\Exceptions\RtnException;
 use Ecpay\Sdk\Factories\Factory;
 use Ecpay\Sdk\Response\VerifiedArrayResponse;
 use Ecpay\Sdk\Services\UrlService;
+
 use function PHPUnit\Framework\throwException;
 
 class ECPay
@@ -44,7 +45,8 @@ class ECPay
     public $factory;
     public $PreCode = "AAAAA";
 
-    public function __construct(){
+    public function __construct()
+    {
         //帳號資訊
         $this->MerchantID = $_ENV["ecpay.MerchantID"];
         $this->HashKey = $_ENV["ecpay.HashKey"];
@@ -60,7 +62,8 @@ class ECPay
         $this->PreCode = random_string('alnum', $PreCodeLength);
     }
 
-    public function getCvsMap($LogisticsSubType){
+    public function getCvsMap($LogisticsSubType)
+    {
         try {
             $this->factory = new Factory([
                 'hashKey' => $this->HashKey,
@@ -90,7 +93,8 @@ class ECPay
             return '(' . $e->getCode() . ')' . $e->getMessage() . PHP_EOL;
         }
     }
-    public function getHTML_CVS($Data,$PaymentData){
+    public function getHTML_CVS($Data, $PaymentData)
+    {
         try {
             $this->factory = new Factory([
                 'hashKey' => $this->HashKey,
@@ -100,7 +104,7 @@ class ECPay
             $autoSubmitFormService = $this->factory->create('AutoSubmitFormWithCmvService');
 
             //訂單價格只能1~20000
-            if( !((int)$Data["Price"]>=1 && (int)$Data["Price"]<=20000) ){
+            if (!((int)$Data["Price"]>=1 && (int)$Data["Price"]<=20000)) {
                 throw new \Exception('訂單金額只能在1~20000元');
             }
             //
@@ -145,7 +149,8 @@ class ECPay
             return $e->getMessage();
         }
     }
-    public function getHTML_AIO($Data,$PaymentData){
+    public function getHTML_AIO($Data, $PaymentData)
+    {
         try {
             $this->factory = new Factory([
                 'hashKey' => $this->HashKey,
@@ -172,7 +177,7 @@ class ECPay
                 'EncryptType' => 1,
             ];
             //不同付款方式、不同參數
-            if($PaymentData["PaymentType"]=="ATM"){
+            if ($PaymentData["PaymentType"]=="ATM") {
                 //導回前端的網址
                 $input["ClientBackURL"] = "https://www.kolshop.com.tw/order_create/".$Data["TradeID"];
                 $input["OrderResultURL"] = "https://www.kolshop.com.tw/order_create/".$Data["TradeID"];
@@ -180,7 +185,7 @@ class ECPay
                 $input["ExpireDate"] = 3;
                 //伺服器端回傳付款相關資訊
                 $input["PaymentInfoURL"] = base_url().'/ECPay/notify/ServerReplyAIO';
-            }elseif($PaymentData["PaymentType"]=="CVS"){
+            } elseif ($PaymentData["PaymentType"]=="CVS") {
                 //CVS:以分鐘為單位
                 //BARCODE:以天為單位
                 $input["StoreExpireDate"] = 4320;//4320分鐘=3天
@@ -191,8 +196,7 @@ class ECPay
                 $input["Desc_4"] = "";
                 //伺服器端回傳付款相關資訊
                 $input["PaymentInfoURL"] = base_url().'/ECPay/notify/ServerReplyAIO';
-
-            }elseif($PaymentData["PaymentType"]=="Credit"){
+            } elseif ($PaymentData["PaymentType"]=="Credit") {
                 //導回前端的網址
                 $input["ClientBackURL"] = "https://www.kolshop.com.tw/order_create/".$Data["TradeID"];
                 //不使用的付款方式
@@ -216,7 +220,8 @@ class ECPay
     }
     /**物流 列印出貨單**/
     //711
-    public function printUNIMART($AllPayLogisticsID,$CVSPaymentNo,$CVSValidationNo){
+    public function printUNIMART($AllPayLogisticsID, $CVSPaymentNo, $CVSValidationNo)
+    {
         try {
             $this->factory = new Factory([
                 'hashKey' => $this->HashKey,
@@ -240,7 +245,8 @@ class ECPay
         }
     }
     //全家
-    public function printFAMI($AllPayLogisticsID,$CVSPaymentNo){
+    public function printFAMI($AllPayLogisticsID, $CVSPaymentNo)
+    {
         try {
             $this->factory = new Factory([
                 'hashKey' => $this->HashKey,
@@ -312,7 +318,8 @@ class ECPay
     [UpdateStatusDate] =>物流狀態更新時間 yyyy/MM/dd HH:mm:ss
     )
      */
-    public function replyAIO($Data){
+    public function replyAIO($Data)
+    {
         try {
             $this->factory = new Factory([
                 'hashKey' => $this->HashKey,
@@ -327,7 +334,8 @@ class ECPay
             return $e->getMessage();
         }
     }
-    public function replyCVS($Data){
+    public function replyCVS($Data)
+    {
         try {
             $this->factory = new Factory([
                 'hashKey' => $this->HashKey,
@@ -341,5 +349,4 @@ class ECPay
             echo '(' . $e->getCode() . ')' . $e->getMessage() . PHP_EOL;
         }
     }
-
 }

@@ -9,23 +9,25 @@ use CodeIgniter\API\ResponseTrait;
 class Stock extends BaseController
 {
     use ResponseTrait;
-    public function getList($GoodsID){
+    public function getList($GoodsID)
+    {
         //
         $oGoodsStock = new \App\Models\Goods\GoodsStock();
         $oGoodsStock->select("GoodsStock.*");
         $oGoodsStock->select("Goods.Title as GoodsTitle");
         $oGoodsStock->select("Color.ColorTitle");
         $oGoodsStock->select("Size.SizeTitle");
-        $oGoodsStock->join("Goods","Goods.GoodsID=GoodsStock.GoodsID");
-        $oGoodsStock->join("Color","Color.ColorID=GoodsStock.ColorID");
-        $oGoodsStock->join("Size","Size.SizeID=GoodsStock.SizeID");
-        $oGoodsStock->where("GoodsStock.GoodsID",$GoodsID);
-        $oGoodsStock->orderBy("GoodsStock.Seq","ASC");
+        $oGoodsStock->join("Goods", "Goods.GoodsID=GoodsStock.GoodsID");
+        $oGoodsStock->join("Color", "Color.ColorID=GoodsStock.ColorID");
+        $oGoodsStock->join("Size", "Size.SizeID=GoodsStock.SizeID");
+        $oGoodsStock->where("GoodsStock.GoodsID", $GoodsID);
+        $oGoodsStock->orderBy("GoodsStock.Seq", "ASC");
         $List = $oGoodsStock->findAll();
         //Res
         return $this->respond(ResponseData::success($List));
     }
-    public function create(){
+    public function create()
+    {
         //
         $GoodsID = $this->request->getVar("GoodsID");
         $ColorID = $this->request->getVar("ColorID");
@@ -38,20 +40,26 @@ class Stock extends BaseController
         $SellPrice = $this->request->getVar("SellPrice");
         $Seq = $this->request->getVar("Seq");
         //檢查ID
-        if($GoodsID){
+        if ($GoodsID) {
             $oGoods = new \App\Models\Goods\Goods();
             $GoodsData = $oGoods->find($GoodsID);
-            if(!$GoodsData) return $this->respond(ResponseData::fail("商品ID有誤"));
+            if (!$GoodsData) {
+                return $this->respond(ResponseData::fail("商品ID有誤"));
+            }
         }
-        if($ColorID){
+        if ($ColorID) {
             $oColor = new \App\Models\Color\Color();
             $ColorData = $oColor->find($ColorID);
-            if(!$ColorData) return $this->respond(ResponseData::fail("顏色ID有誤"));
+            if (!$ColorData) {
+                return $this->respond(ResponseData::fail("顏色ID有誤"));
+            }
         }
-        if($SizeID){
+        if ($SizeID) {
             $oSize = new \App\Models\Size\Size();
             $SizeData = $oSize->find($SizeID);
-            if(!$SizeData) return $this->respond(ResponseData::fail("尺寸ID有誤"));
+            if (!$SizeData) {
+                return $this->respond(ResponseData::fail("尺寸ID有誤"));
+            }
         }
         $oGoodsStock = new \App\Models\Goods\GoodsStock();
 //        $oGoodsStock->resetQuery();
@@ -75,34 +83,36 @@ class Stock extends BaseController
             "SellPrice"=>$SellPrice,
             "Seq"=>$Seq,
         ]);
-        if($oGoodsStock->errors()){
-            $ErrorMsg = implode(",",$oGoodsStock->errors());
+        if ($oGoodsStock->errors()) {
+            $ErrorMsg = implode(",", $oGoodsStock->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $oGoodsStock->resetQuery();
-        $oGoodsStock->where("GoodsID",$GoodsID);
-        $oGoodsStock->where("ColorID",$ColorID);
-        $oGoodsStock->where("SizeID",$SizeID);
+        $oGoodsStock->where("GoodsID", $GoodsID);
+        $oGoodsStock->where("ColorID", $ColorID);
+        $oGoodsStock->where("SizeID", $SizeID);
         $Data = $oGoodsStock->first();
         return $this->respond(ResponseData::success($Data));
     }
-    public function updateSeqBatch(){
+    public function updateSeqBatch()
+    {
         $SeqArray = $this->request->getVar();
-        if(!is_array($SeqArray)) return $this->respond(ResponseData::fail("資料須為陣列"));
+        if (!is_array($SeqArray)) {
+            return $this->respond(ResponseData::fail("資料須為陣列"));
+        }
         //更新排序
         $oGoodsStock = new \App\Models\Goods\GoodsStock();
         $oGoodsStock->protect(false);
-        foreach ($SeqArray as $key=>$Data){
+        foreach ($SeqArray as $key=>$Data) {
             $oGoodsStock->resetQuery();
-            $oGoodsStock->where("GoodsID",$Data->GoodsID);
-            $oGoodsStock->where("ColorID",$Data->ColorID);
-            $oGoodsStock->where("SizeID",$Data->SizeID);
+            $oGoodsStock->where("GoodsID", $Data->GoodsID);
+            $oGoodsStock->where("ColorID", $Data->ColorID);
+            $oGoodsStock->where("SizeID", $Data->SizeID);
             $oGoodsStock->set(["Seq"=>$Data->Seq]);
             $oGoodsStock->update();
         }
         //Res
         return $this->respond(ResponseData::success([]));
     }
-
 }

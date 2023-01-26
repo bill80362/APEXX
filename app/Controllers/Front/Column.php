@@ -9,9 +9,10 @@ use CodeIgniter\API\ResponseTrait;
 class Column extends BaseController
 {
     use ResponseTrait;
-    public function getList(){
+    public function getList()
+    {
         $oDataColumn = new \App\Models\DataColumn();
-        $oDataColumn->where("Front","Y");
+        $oDataColumn->where("Front", "Y");
         $List = $oDataColumn->findAll();
         //Res
         return $this->respond(ResponseData::success($List));

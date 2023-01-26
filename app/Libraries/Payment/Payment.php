@@ -13,49 +13,58 @@ class Payment
     /**
      * @throws \Exception
      */
-    public function getLinkHTML($TradeInsertData, $Device="PC"){
+    public function getLinkHTML($TradeInsertData, $Device="PC")
+    {
         $PaymentHTML = "";
         $oPayment = new \App\Models\Payment\Payment();
         $PaymentData = $oPayment->find($TradeInsertData["PaymentID"]);
-        if($PaymentData){
-            if( in_array($PaymentData["PaymentID"],["Credit","ATM","CVS"]) ){
+        if ($PaymentData) {
+            if (in_array($PaymentData["PaymentID"], ["Credit","ATM","CVS"], true)) {
                 //綠界信用卡、ATM、超商代碼
                 $oLibECPay = new \App\Libraries\Payment\ECPay();
-                $PaymentHTML = $oLibECPay->getHTML_AIO($TradeInsertData,$PaymentData);
-            }elseif( in_array($PaymentData["PaymentType"],["FAMIC2C","UNIMARTC2C"]) ){
+                $PaymentHTML = $oLibECPay->getHTML_AIO($TradeInsertData, $PaymentData);
+            } elseif (in_array($PaymentData["PaymentType"], ["FAMIC2C","UNIMARTC2C"], true)) {
                 //綠界 貨到付款 全家 7-11
                 $oLibECPay = new \App\Libraries\Payment\ECPay();
-                $PaymentHTML = $oLibECPay->getHTML_CVS($TradeInsertData,$PaymentData);
-            }elseif( in_array($PaymentData["PaymentType"],["JKO"]) ){
+                $PaymentHTML = $oLibECPay->getHTML_CVS($TradeInsertData, $PaymentData);
+            } elseif (in_array($PaymentData["PaymentType"], ["JKO"], true)) {
                 //街口支付
                 $oLibJkoPay = new \App\Libraries\Payment\JkoPay();
-                $LinkURL = $oLibJkoPay->getLink($TradeInsertData,$Device);
-                if(!$LinkURL) throw new \Exception($oLibJkoPay->ErrorMessage);
+                $LinkURL = $oLibJkoPay->getLink($TradeInsertData, $Device);
+                if (!$LinkURL) {
+                    throw new \Exception($oLibJkoPay->ErrorMessage);
+                }
                 $PaymentHTML = $LinkURL;
-            }elseif( in_array($PaymentData["PaymentType"],["LINEPAY"]) ){
+            } elseif (in_array($PaymentData["PaymentType"], ["LINEPAY"], true)) {
                 //LinePay
                 $oLibLinePay = new \App\Libraries\Payment\LinePay();
-                $LinkURL = $oLibLinePay->getLink($TradeInsertData,$Device);
-                if(!$LinkURL) throw new \Exception($oLibLinePay->ErrorMessage);
+                $LinkURL = $oLibLinePay->getLink($TradeInsertData, $Device);
+                if (!$LinkURL) {
+                    throw new \Exception($oLibLinePay->ErrorMessage);
+                }
                 $PaymentHTML = $LinkURL;
-            }elseif( in_array($PaymentData["PaymentType"],["PCHomeCredit"]) ){
+            } elseif (in_array($PaymentData["PaymentType"], ["PCHomeCredit"], true)) {
                 $oLib = new \App\Libraries\Payment\PCHomePay();
-                $LinkURL = $oLib->getLink($TradeInsertData,$Device,["CARD"]);
-                if(!$LinkURL) throw new \Exception($oLib->ErrorMessage);
+                $LinkURL = $oLib->getLink($TradeInsertData, $Device, ["CARD"]);
+                if (!$LinkURL) {
+                    throw new \Exception($oLib->ErrorMessage);
+                }
                 $PaymentHTML = $LinkURL;
-            }elseif( in_array($PaymentData["PaymentType"],["PCHomeATM"]) ){
+            } elseif (in_array($PaymentData["PaymentType"], ["PCHomeATM"], true)) {
                 $oLib = new \App\Libraries\Payment\PCHomePay();
-                $LinkURL = $oLib->getLink($TradeInsertData,$Device,["ATM"]);
-                if(!$LinkURL) throw new \Exception($oLib->ErrorMessage);
+                $LinkURL = $oLib->getLink($TradeInsertData, $Device, ["ATM"]);
+                if (!$LinkURL) {
+                    throw new \Exception($oLib->ErrorMessage);
+                }
                 $PaymentHTML = $LinkURL;
-            }elseif( in_array($PaymentData["PaymentType"],["NormalATM"]) ){
+            } elseif (in_array($PaymentData["PaymentType"], ["NormalATM"], true)) {
                 $PaymentHTML = "";
                 //
                 $oDataColumn = new \App\Models\DataColumn();
                 //交易等待中、ＡＴＭ更新帳號
                 $oTrade = new \App\Models\Trade\Trade();
                 $oTrade->protect(false);
-                $oTrade->update($TradeInsertData["TradeID"],[
+                $oTrade->update($TradeInsertData["TradeID"], [
                     "ThirdPartyData" => $oDataColumn->find("ATMInfo")["Content"]??"",
                 ]);
                 /**訂單產生通知**/
@@ -66,6 +75,4 @@ class Payment
         //
         return $PaymentHTML;
     }
-
-
 }

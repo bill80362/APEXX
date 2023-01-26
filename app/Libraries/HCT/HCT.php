@@ -18,7 +18,8 @@ class HCT
     public $Password = "";
     public $URL = "";
     //
-    public function __construct(){
+    public function __construct()
+    {
         //
         $this->Company = $_ENV["HCT.Company"];
         $this->Password = $_ENV["HCT.Password"];
@@ -28,16 +29,17 @@ class HCT
         $this->PreCode = random_string('alnum', 5);
     }
     //
-    public function sendData($TradeID,$ReceiverName,$ReceiverPhone,$ReceiverAddress,$Price,$Weight){
-        $arrContextOptions=array("ssl"=>array( "verify_peer"=>false, "verify_peer_name"=>false,'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT));
-        $options = array(
+    public function sendData($TradeID, $ReceiverName, $ReceiverPhone, $ReceiverAddress, $Price, $Weight)
+    {
+        $arrContextOptions=["ssl"=>[ "verify_peer"=>false, "verify_peer_name"=>false,'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT]];
+        $options = [
             'soap_version'=>SOAP_1_2,
             'exceptions'=>true,
             'trace'=>1,
             'cache_wsdl'=>WSDL_CACHE_NONE,
             'stream_context' => stream_context_create($arrContextOptions)
-        );
-        $client = new \SoapClient($this->URL."/EDI_WebService2/Service1.asmx?WSDL", $options );
+        ];
+        $client = new \SoapClient($this->URL."/EDI_WebService2/Service1.asmx?WSDL", $options);
 
         $List = [];
         $List[] = [
@@ -63,45 +65,49 @@ class HCT
 //            'EMARK'=>'',//備註
         ];
 
-        $param_ary =  array('company'=>$this->Company,'password'=>$this->Password,'json'=> json_encode($List)  ) ;
+        $param_ary =  ['company'=>$this->Company,'password'=>$this->Password,'json'=> json_encode($List)  ] ;
 
-        $aryResult =$client->__soapCall('TransData_Json',array('parameters' => $param_ary) );
-        $ResponseData = json_decode($aryResult->TransData_JsonResult,true);
+        $aryResult =$client->__soapCall('TransData_Json', ['parameters' => $param_ary]);
+        $ResponseData = json_decode($aryResult->TransData_JsonResult, true);
 //        print($aryResult->TransData_JsonResult);
         return $ResponseData;
     }
-    public function getLabelImage($str){
+    public function getLabelImage($str)
+    {
         $img = $this->hexToStr($str);
         return $img;
     }
-    public function getShippingInfo($HCT_No){
+    public function getShippingInfo($HCT_No)
+    {
         //新竹貨運給的加密規則
         $EncryptIV = "QCSVRDHT";
-        $EncryptKey = date("Ymd",strtotime("-357 day"));
-        $no = $this->encrypt($HCT_No,$EncryptKey,$EncryptIV);
+        $EncryptKey = date("Ymd", strtotime("-357 day"));
+        $no = $this->encrypt($HCT_No, $EncryptKey, $EncryptIV);
         //新竹貨運給的 v
         $v = "487E08E062A8CA61013B07B90B99839A";
         //
         $URL = "https://hctapiweb.hct.com.tw/phone/searchGoods_Main.aspx?no=".$no."&v=".$v;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $URL);
-        curl_setopt($ch, CURLOPT_HEADER, FALSE);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $rs = curl_exec($ch);
         curl_close($ch);
         return $rs;
     }
     //文字轉圖片
-    protected function strToHex($str){
+    protected function strToHex($str)
+    {
         $hex = '';
-        for($i = 0; $i < strlen($str); $i++){
+        for ($i = 0; $i < strlen($str); $i++) {
             $hex .= dechex(ord($str[$i]));
         }
         return $hex;
     }
-    protected function hexToStr($hex){
+    protected function hexToStr($hex)
+    {
         $str = '';
-        for($i = 0; $i < strlen($hex)-1; $i += 2){
+        for ($i = 0; $i < strlen($hex)-1; $i += 2) {
             $str .= chr(hexdec($hex[$i].$hex[$i+1]));
         }
         return $str;
@@ -110,7 +116,8 @@ class HCT
     /*
     * 在采用DES加密算法,cbc模式,pkcs5Padding字符填充方式下,对明文进行加密函数
     */
-    function encrypt($input, $ky, $iv) {
+    public function encrypt($input, $ky, $iv)
+    {
         $key = $ky;
 //        $iv = $iv;  //$iv为加解密向量
         $size = 8; //填充块的大小,单位为bite    初始向量iv的位数要和进行pading的分组块大小相等!!!
@@ -123,8 +130,9 @@ class HCT
     /*
     * 在采用DES加密算法,cbc模式,pkcs5Padding字符填充方式,对密文进行解密函数
     */
-    function decrypt($crypt, $ky, $iv) {
-        $crypt = base64_decode($crypt);   //对加密后的密文进行解base64编码
+    public function decrypt($crypt, $ky, $iv)
+    {
+        $crypt = base64_decode($crypt, true);   //对加密后的密文进行解base64编码
         $key = $ky;
         $iv = $iv;  //$iv为加解密向量
         $td = mcrypt_module_open(MCRYPT_DES, '', 'cbc', '');    //MCRYPT_DES代表用DES算法加解密;'cbc'代表使用cbc模式进行加解密.
@@ -139,19 +147,20 @@ class HCT
     /*
     * 对明文进行给定块大小的字符填充
     */
-    function pkcs5_pad($text, $blocksize) {
+    public function pkcs5_pad($text, $blocksize)
+    {
         $pad = $blocksize - (strlen($text) % $blocksize);
         return $text . str_repeat(chr($pad), $pad);
     }
     /*
     * 对解密后的已字符填充的明文进行去掉填充字符
     */
-    function pkcs5_unpad($text) {
+    public function pkcs5_unpad($text)
+    {
         $pad = ord($text[strlen($text) - 1]);
-        if ($pad > strlen($text))
+        if ($pad > strlen($text)) {
             return false;
+        }
         return substr($text, 0, -1 * $pad);
     }
-
-
 }

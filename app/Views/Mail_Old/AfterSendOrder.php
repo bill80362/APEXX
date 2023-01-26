@@ -638,7 +638,7 @@
 
 													<table style="width:100%;font-size:12px;color:#333333">
 														<tbody>
-                                                        <? foreach ($SubTradeList as $SubTrade) {?>
+                                                        <?php foreach ($SubTradeList as $SubTrade) {?>
                                                             <!-- 一個商品開始 -->
                                                             <tr>
                                                                 <td
@@ -654,7 +654,7 @@
                                                                 </td>
                                                             </tr>
                                                             <!-- 一個商品結束 -->
-                                                        <? } ?>
+                                                        <?php } ?>
 															<!-- 運費開始 -->
 															<tr>
 																<td

@@ -9,7 +9,8 @@ use CodeIgniter\API\ResponseTrait;
 class ContactUs extends BaseController
 {
     use ResponseTrait;
-    public function send(){
+    public function send()
+    {
         //
         $Name = $this->request->getVar("Name");
         $Phone = $this->request->getVar("Phone");
@@ -38,8 +39,8 @@ class ContactUs extends BaseController
         $HTML_ContactUs = view('/Mail/Contact_us', $ViewData);
         //寄信
         $oMail = new \App\Libraries\Tools\Mail();
-        $oMail->send($Email,"網站聯絡表單",$HTML_Contact);//給客戶
-        $oMail->send($oMail->GmailUsername,"網站聯絡表單",$HTML_ContactUs);//給廠商
+        $oMail->send($Email, "網站聯絡表單", $HTML_Contact);//給客戶
+        $oMail->send($oMail->GmailUsername, "網站聯絡表單", $HTML_ContactUs);//給廠商
         //Res
         return $this->respond(ResponseData::success([]));
     }

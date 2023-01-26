@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Libraries\ECPay;
 
 //載入SDK(路徑可依系統規劃自行調整)
@@ -24,17 +25,18 @@ class CheckoutPayment
     public $HOME_URL = "";
     public $SERVER_URL = "";
 
-    public function __construct($Data=""){
+    public function __construct($Data="")
+    {
         //
         $this->HOME_URL = base_url();
         $this->SERVER_URL = base_url();
 
         //參數修改
-        if($Data=="CVS"){
+        if ($Data=="CVS") {
             $this->oECPay = new EcpayLogistics();
             $this->oECPay->HashKey     = $this->HashKey ;                                     //測試用Hashkey，請自行帶入ECPay提供的HashKey
             $this->oECPay->HashIV      = $this->HashIV ;
-        }else{
+        } else {
             $this->oECPay = new ECPay_AllInOne();
             $this->oECPay->ServiceURL  = $this->ECURL; //服務位置
             $this->oECPay->HashKey     = $this->HashKey ;                                            //測試用Hashkey，請自行帶入ECPay提供的HashKey
@@ -44,7 +46,8 @@ class CheckoutPayment
         }
     }
     //信用卡
-    public function credit($Data){
+    public function credit($Data)
+    {
         $this->oECPay->ServiceURL = $this->oECPay->ServiceURL."/Cashier/AioCheckOut/V5";
         //基本參數(請依系統規劃自行調整)
 //        $this->oECPay->Send['ReturnURL']         = $this->HOME_URL.'/tightpac_website/Order/'.$Data["ShopID"] ;    //付款完成通知回傳的網址
@@ -61,15 +64,16 @@ class CheckoutPayment
 //        $this->oECPay->Send['OrderResultURL']         = $this->HOME_URL . '/Order/?shop_id='.$Data["ShopID"] ;
 
         //訂單的商品資料
-        foreach ($Data["Product"] as $key=>$value){
-            array_push($this->oECPay->Send['Items'],
-                array(
+        foreach ($Data["Product"] as $key=>$value) {
+            array_push(
+                $this->oECPay->Send['Items'],
+                [
                     'Name' => $value["Title"],
                     'Price' => (int)$value["Price"],
                     'Currency' => "元",
                     'Quantity' => (int)$value["Count"],
                     'URL' => "url"
-                )
+                ]
             );
         }
 
@@ -84,7 +88,8 @@ class CheckoutPayment
         $this->CheckOutString =  $this->oECPay->CheckOutString();
     }
     //ATM
-    public function atm($Data){
+    public function atm($Data)
+    {
         $this->oECPay->ServiceURL = $this->oECPay->ServiceURL."/Cashier/AioCheckOut/V5";
         //基本參數(請依系統規劃自行調整)
 //        $this->oECPay->Send['ReturnURL']         = $this->HOME_URL.'/tightpac_website/Order/'.$Data["ShopID"] ;    //付款完成通知回傳的網址
@@ -100,15 +105,16 @@ class CheckoutPayment
         $this->oECPay->Send['OrderResultURL']         = $this->HOME_URL . '/Order/?shop_id='.$Data["ShopID"] ;
 
         //訂單的商品資料
-        foreach ($Data["Product"] as $key=>$value){
-            array_push($this->oECPay->Send['Items'],
-                array(
+        foreach ($Data["Product"] as $key=>$value) {
+            array_push(
+                $this->oECPay->Send['Items'],
+                [
                     'Name' => $value["Title"],
                     'Price' => (int)$value["Price"],
                     'Currency' => "元",
                     'Quantity' => (int)$value["Count"],
                     'URL' => "url"
-                )
+                ]
             );
         }
 
@@ -120,13 +126,14 @@ class CheckoutPayment
         $this->CheckOutString =  $this->oECPay->CheckOutString();
     }
     //執行跳轉
-    public function go(){
+    public function go()
+    {
         $this->oECPay->CheckOut();
     }
     //取得統一超商地點
-    public function CvsMap(){
-
-        $this->oECPay->Send = array(
+    public function CvsMap()
+    {
+        $this->oECPay->Send = [
             'MerchantID' => $this->MerchantID,
             'MerchantTradeNo' => 'no' . date('YmdHis'),
             'LogisticsSubType' => EcpayLogisticsSubType::UNIMART_C2C,//UNIMART 統一超商
@@ -136,16 +143,18 @@ class CheckoutPayment
             'ServerReplyURL' => $this->HOME_URL.'/test.php',
             'ExtraData' => '測試額外資訊',//供廠商傳遞保留的資訊，在回傳參數中，會原值回傳。
             'Device' => EcpayDevice::PC //Mobile或PC 7-11有差 全家沒差
-        );
+        ];
         // CvsMap(Button名稱, Form target)
         $html = $this->oECPay->CvsMap('選擇7-11超商');
         //是否自動跳轉
-        if(false){$html .= "<script type='text/javascript'>document.getElementById('ECPayForm').submit();</script>";}
+        if (false) {
+            $html .= "<script type='text/javascript'>document.getElementById('ECPayForm').submit();</script>";
+        }
         echo $html;
     }
     //送出
-    public function goCvs($Data){
-
+    public function goCvs($Data)
+    {
         //訂單的商品資料
         $ProductTxt = "";
 //        foreach ($Data["Product"] as $key=>$value){
@@ -153,7 +162,7 @@ class CheckoutPayment
 //            $ProductTxt .= "@".implode(",",$product);
 //        }
 
-        $this->oECPay->Send = array(
+        $this->oECPay->Send = [
             'MerchantID' => $this->MerchantID,
             'MerchantTradeNo' => $Data["ShopID"],
             'MerchantTradeDate' => date('Y/m/d H:i:s'),
@@ -180,22 +189,25 @@ class CheckoutPayment
             'LogisticsC2CReplyURL' => $this->SERVER_URL . '/api/ServerReplyLogisticsStore',//當 User 選擇取貨門市有問題時，會透過此 URL 通知特店，請特店通知 User 重新選擇門市。
             'Remark' => $ProductTxt,//這邊放入產品細目
             'PlatformID' => '',//特約合作平台商代號
-        );
+        ];
 
-        $this->oECPay->SendExtend = array(
+        $this->oECPay->SendExtend = [
             'ReceiverStoreID' => $Data["ECReceiverStoreID"],//收件人門市代號
             'ReturnStoreID' => '',//退貨門市代號
-        );
+        ];
         // CreateShippingOrder()
         $Result = $this->oECPay->CreateShippingOrder();
 //        echo '<pre>' . print_r($Result, true) . '</pre>';
         //是否自動跳轉
-        if(false){$Result .= "<script type='text/javascript'>document.getElementById('ECPayForm').submit();</script>";}
+        if (false) {
+            $Result .= "<script type='text/javascript'>document.getElementById('ECPayForm').submit();</script>";
+        }
         echo $Result;
         exit();
     }
     //去EC抓訂單資料
-    public function getTradeInfo(){
+    public function getTradeInfo()
+    {
         //
         $this->oECPay->ServiceURL = $this->oECPay->ServiceURL."/Cashier/QueryTradeInfo/V5";
 
@@ -210,35 +222,37 @@ class CheckoutPayment
         echo "<pre>" . print_r($info, true) . "</pre>";
     }
     //去EC抓訂單資料
-    public function getTradeInfo_Logistics(){
-
-        $this->oECPay->Send = array(
+    public function getTradeInfo_Logistics()
+    {
+        $this->oECPay->Send = [
             'MerchantID' => $this->MerchantID,
             'AllPayLogisticsID' => '1607810',//綠界物流訂單編號
             'PlatformID' => ''
-        );
+        ];
         // QueryLogisticsInfo()
         $Result = $this->oECPay->QueryLogisticsInfo();
         echo '<pre>' . print_r($Result, true) . '</pre>';
     }
     //去EC抓 託運單
-    public function ECBill_UnimartC2C($_AllPayLogisticsID,$_CVSPaymentNo,$_CVSValidationNo){
-            $this->oECPay->Send = array(
-                'MerchantID' => $this->MerchantID,
-                'AllPayLogisticsID' => $_AllPayLogisticsID,
-                'CVSPaymentNo' => $_CVSPaymentNo,
-                'CVSValidationNo' => $_CVSValidationNo,
-                'PlatformID' => ''
-            );
-            // PrintUnimartC2CBill(Button名稱, Form target)
-            $html = $this->oECPay->PrintUnimartC2CBill('列印繳款單(統一超商C2C)');
-            return $html;
+    public function ECBill_UnimartC2C($_AllPayLogisticsID, $_CVSPaymentNo, $_CVSValidationNo)
+    {
+        $this->oECPay->Send = [
+            'MerchantID' => $this->MerchantID,
+            'AllPayLogisticsID' => $_AllPayLogisticsID,
+            'CVSPaymentNo' => $_CVSPaymentNo,
+            'CVSValidationNo' => $_CVSValidationNo,
+            'PlatformID' => ''
+        ];
+        // PrintUnimartC2CBill(Button名稱, Form target)
+        $html = $this->oECPay->PrintUnimartC2CBill('列印繳款單(統一超商C2C)');
+        return $html;
     }
     //ECReply
-    public function ECReply(){
+    public function ECReply()
+    {
         //DB紀錄
         $oECReply = new ECReply();
-        $oECReply->create(array("Data"=> print_r($_POST,true)));
+        $oECReply->create(["Data"=> print_r($_POST, true)]);
         //檢查回傳
         $this->oECPay->CheckOutFeedback($_POST);
         /**
@@ -266,30 +280,30 @@ class CheckoutPayment
          */
         //更新DB
         $ShopID = $_POST["MerchantTradeNo"];
-        $Data = array(
+        $Data = [
             "ECPaymentType"=>$_POST["PaymentType"],
             "ECAmount"=>$_POST["TradeAmt"],
             "ECTradeNo"=>$_POST["TradeNo"],
             "ECRtnCode"=>$_POST["RtnCode"],
             "ECRtnMsg"=>$_POST["RtnMsg"],
-        );
+        ];
         //更新訂單狀態
-        if($_POST["PaymentType"]==1){
+        if ($_POST["PaymentType"]==1) {
             $Data["Status"] = "Y";
         }
-        if(isset($_POST["BankCode"])){
+        if (isset($_POST["BankCode"])) {
             $Data["ECData"] = "(".$_POST["BankCode"].")".$_POST["vAccount"]."_Ex:".$_POST["ExpireDate"];
         }
-        if(isset($_POST["PaymentTypeChargeFee"])){
+        if (isset($_POST["PaymentTypeChargeFee"])) {
             $Data["ECChargeFee"] = $_POST["PaymentTypeChargeFee"];
         }
-        if(isset($_POST["PaymentDate"])){
+        if (isset($_POST["PaymentDate"])) {
             $Data["ECPaymentDate"] = $_POST["PaymentDate"];
         }
         //SQL
         $oShop = new Shop();
         //訂單已經成功/失敗的不能改
-        if($oShop->update($Data,"ShopID='".$ShopID."' AND (Status='W' OR Status='S')  ")){
+        if ($oShop->update($Data, "ShopID='".$ShopID."' AND (Status='W' OR Status='S')  ")) {
             //發出訂購單信件
 //            $oShop = new Shop();
 //            $Shop = $oShop->getData("ShopID='".$ShopID."'");
@@ -301,17 +315,17 @@ class CheckoutPayment
             $ShopData = $oShop->getData("ShopID='".$ShopID."'");
             //寄出ATM虛擬帳號資造
             $oSendMail = new SendMail();
-            if($ShopData["Payment"]=="ATM" && $ShopData["ECRtnCode"]==2 && $ShopData["ECData"]!=""){
+            if ($ShopData["Payment"]=="ATM" && $ShopData["ECRtnCode"]==2 && $ShopData["ECData"]!="") {
                 //虛擬ATM信件
                 $MailBody = MailTemp::toCustomerATM($ShopData);
-                $oSendMail->sendMail($ShopData["Email"],"TIGHTPACTW網路商城-ATM繳費帳號",$MailBody);
-            }elseif( in_array($ShopData["Payment"],["ATM","CREDIT"]) && $ShopData["ECRtnCode"]==1 ){
+                $oSendMail->sendMail($ShopData["Email"], "TIGHTPACTW網路商城-ATM繳費帳號", $MailBody);
+            } elseif (in_array($ShopData["Payment"], ["ATM","CREDIT"], true) && $ShopData["ECRtnCode"]==1) {
                 //付款成功 寄信給公司
-                $MailBody = MailTemp::toCompany($ShopData,"已下單","已付款");
-                $oSendMail->sendMail($oSendMail->SendFromMail,"TIGHTPACTW網路商城-感謝您的訂購",$MailBody);
+                $MailBody = MailTemp::toCompany($ShopData, "已下單", "已付款");
+                $oSendMail->sendMail($oSendMail->SendFromMail, "TIGHTPACTW網路商城-感謝您的訂購", $MailBody);
                 //付款成功 寄信給客戶
-                $MailBody = MailTemp::toCustomer($ShopData,"已下單","已付款","備貨中");
-                $oSendMail->sendMail($ShopData["Email"],"TIGHTPACTW網路商城-感謝您的訂購",$MailBody);
+                $MailBody = MailTemp::toCustomer($ShopData, "已下單", "已付款", "備貨中");
+                $oSendMail->sendMail($ShopData["Email"], "TIGHTPACTW網路商城-感謝您的訂購", $MailBody);
             }
 
 
@@ -322,14 +336,13 @@ class CheckoutPayment
         //Error
         echo '0|Error';
         exit();
-
-
     }
     //ECReply-以物流狀態進行相對應的處理
-    public function ECReply_Logistics(){
+    public function ECReply_Logistics()
+    {
         //DB紀錄
         $oECReply = new ECReply();
-        $oECReply->create(array("Data"=> print_r($_POST,true)));
+        $oECReply->create(["Data"=> print_r($_POST, true)]);
         //檢查回傳
         $this->oECPay->CheckOutFeedback($_POST);
         // 以物流狀態進行相對應的處理
@@ -361,13 +374,13 @@ class CheckoutPayment
          */
         //更新DB
         $ShopID = $_POST["MerchantTradeNo"];
-        $Data = array(
+        $Data = [
             "ECPaymentType"=>$_POST["LogisticsType"]."_".$_POST["LogisticsSubType"],
             "ECAmount"=>$_POST["GoodsAmount"],
             "ECTradeNo"=>$_POST["AllPayLogisticsID"],
             "ECRtnCode"=>$_POST["RtnCode"],
             "ECRtnMsg"=>$_POST["RtnMsg"],
-        );
+        ];
         //更新訂單狀態
         //不知道什麼情況算是這筆交易完成
 //        if($_POST["PaymentType"]==1){
@@ -379,20 +392,20 @@ class CheckoutPayment
 //        if(isset($_POST["PaymentTypeChargeFee"])){
 //            $Data["ECChargeFee"] = $_POST["PaymentTypeChargeFee"];
 //        }
-        if(isset($_POST["UpdateStatusDate"])){
+        if (isset($_POST["UpdateStatusDate"])) {
             $Data["ECPaymentDate"] = $_POST["UpdateStatusDate"];
         }
         //CVS_UNIMARTC2C才有的參數，之後列印託運單會用到
-        if(isset($_POST["CVSPaymentNo"])){
+        if (isset($_POST["CVSPaymentNo"])) {
             $Data["ECCVSPaymentNo"] = $_POST["CVSPaymentNo"];
         }
-        if(isset($_POST["CVSValidationNo"])){
+        if (isset($_POST["CVSValidationNo"])) {
             $Data["ECCVSValidationNo"] = $_POST["CVSValidationNo"];
         }
         //SQL
         $oShop = new Shop();
         //訂單已經成功/失敗的不能改
-        if($oShop->update($Data,"ShopID='".$ShopID."' AND (Status='W' OR Status='S') ")){
+        if ($oShop->update($Data, "ShopID='".$ShopID."' AND (Status='W' OR Status='S') ")) {
             //發出訂購單信件
 //            $oShop = new Shop();
 //            $Shop = $oShop->getData("ShopID='".$ShopID."'");
@@ -403,13 +416,13 @@ class CheckoutPayment
             $ShopData = $oShop->getData("ShopID='".$ShopID."'");
             //寄出ATM虛擬帳號資造
             $oSendMail = new SendMail();
-            if($ShopData["Payment"]=="CVS" && $ShopData["ECRtnCode"]==300 && $ShopData["ECData"]!=""){
+            if ($ShopData["Payment"]=="CVS" && $ShopData["ECRtnCode"]==300 && $ShopData["ECData"]!="") {
                 //付款成功 寄信給公司
-                $MailBody = MailTemp::toCompany($ShopData,"已下單","未付款");
-                $oSendMail->sendMail($oSendMail->SendFromMail,"TIGHTPACTW網路商城-訂購成功通知信件",$MailBody);
+                $MailBody = MailTemp::toCompany($ShopData, "已下單", "未付款");
+                $oSendMail->sendMail($oSendMail->SendFromMail, "TIGHTPACTW網路商城-訂購成功通知信件", $MailBody);
                 //付款成功 寄信給客戶
-                $MailBody = MailTemp::toCustomer($ShopData,"已下單","未付款","備貨中");
-                $oSendMail->sendMail($ShopData["Email"],"TIGHTPACTW網路商城-訂購成功通知信件",$MailBody);
+                $MailBody = MailTemp::toCustomer($ShopData, "已下單", "未付款", "備貨中");
+                $oSendMail->sendMail($ShopData["Email"], "TIGHTPACTW網路商城-訂購成功通知信件", $MailBody);
             }
 
 
@@ -422,10 +435,11 @@ class CheckoutPayment
         exit();
     }
     //ECReply-物流以更新門市通知進行相對應的處理
-    public function ECReply_Logistics_Store(){
+    public function ECReply_Logistics_Store()
+    {
         //DB紀錄
         $oECReply = new ECReply();
-        $oECReply->create(array("Data"=> print_r($_POST,true)));
+        $oECReply->create(["Data"=> print_r($_POST, true)]);
         //檢查回傳
         $this->oECPay->CheckOutFeedback($_POST);
         /**
@@ -449,11 +463,10 @@ class CheckoutPayment
          */
         //DB
         $oECReply_Logistics_Store = new ECReply_Logistics_Store();
-        if($oECReply_Logistics_Store->create($_POST)){
+        if ($oECReply_Logistics_Store->create($_POST)) {
             // 在網頁端回應 1|OK
             echo '1|OK';
             exit();
         }
     }
-
 }

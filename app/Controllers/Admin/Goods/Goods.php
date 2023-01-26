@@ -8,8 +8,8 @@ use CodeIgniter\API\ResponseTrait;
 
 class Goods extends BaseController
 {
-    public $ImageDirPath = "/image/goods";
     use ResponseTrait;
+    public $ImageDirPath = "/image/goods";
     public function getList()
     {
         // 23.0109 彥佐修改，因後台商品資料原本沒有帶庫存數量，客戶希望商品列表能顯示庫存數量
@@ -95,7 +95,6 @@ class Goods extends BaseController
             if (!$MenuData) {
                 return $this->respond(ResponseData::fail("選單編號錯誤"));
             }
-
         }
         //
         $oGoods = new \App\Models\Goods\Goods();
@@ -154,7 +153,6 @@ class Goods extends BaseController
             if (!$MenuData) {
                 return $this->respond(ResponseData::fail("選單編號錯誤"));
             }
-
         }
         //
         $oGoods = new \App\Models\Goods\Goods();
@@ -190,7 +188,6 @@ class Goods extends BaseController
                 if (file_exists($FileHostPath)) {
                     unlink($FileHostPath);
                 }
-
             }
             //更新路徑
             $updateData["Image1"] = $Image1;
@@ -202,7 +199,6 @@ class Goods extends BaseController
                 if (file_exists($FileHostPath)) {
                     unlink($FileHostPath);
                 }
-
             }
             //更新路徑
             $updateData["Image2"] = $Image2;
@@ -232,7 +228,6 @@ class Goods extends BaseController
             if (file_exists($FileHostPath)) {
                 unlink($FileHostPath);
             }
-
         }
         //刪除原本圖檔
         if (isset($Data["Image2"]) && $Data["Image2"] != "") {
@@ -240,7 +235,6 @@ class Goods extends BaseController
             if (file_exists($FileHostPath)) {
                 unlink($FileHostPath);
             }
-
         }
         //刪除DB
         $oGoods->protect(false);
@@ -277,7 +271,7 @@ class Goods extends BaseController
                     return $this->respond(ResponseData::fail("檔案不能超過5MB"));
                 }
 
-                if (!in_array($file->getMimeType(), ["image/jpg", "image/png", "image/gif", "image/jpeg", "image/webp"])) {
+                if (!in_array($file->getMimeType(), ["image/jpg", "image/png", "image/gif", "image/jpeg", "image/webp"], true)) {
                     return $this->respond(ResponseData::fail("檔案格式限制jpg,png,gif,jpeg,webp"));
                 }
 
@@ -287,7 +281,6 @@ class Goods extends BaseController
                     if (file_exists($FileHostPath)) {
                         unlink($FileHostPath);
                     }
-
                 }
                 //產生隨機名稱
                 $name = $file->getRandomName();

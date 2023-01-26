@@ -25,7 +25,8 @@ class LinePay
     public $IconUrlPath = "";
     public $NotifyUrl = "";
 
-    public function __construct(){
+    public function __construct()
+    {
         //
         $this->ChannelID = $_ENV["LinePay.ChannelID"];
         $this->ChannelSecret = $_ENV["LinePay.ChannelSecret"];
@@ -39,7 +40,8 @@ class LinePay
     /**
      * @throws \Exception
      */
-    public function getLink($Data,$Device){
+    public function getLink($Data, $Device)
+    {
         $linePay = new \yidas\linePay\Client([
             'channelId' => $this->ChannelID,
             'channelSecret' => $this->ChannelSecret,
@@ -75,33 +77,34 @@ class LinePay
         }
         //填入訂單對應LinePay的ID
         $oTrade = new \App\Models\Trade\Trade();
-        $oTrade->update($Data["TradeID"],[
+        $oTrade->update($Data["TradeID"], [
             "ThirdPartyID"=> $response->getInfo()["transactionId"],
         ]);
         //回傳連結
-        if($Device=="PC"){
+        if ($Device=="PC") {
             return $response->getPaymentUrl("web");
-        }else{
+        } else {
             return $response->getPaymentUrl("app");
         }
     }
     //交易成功後的頁面 要回傳到後端，後端會再跟Line溝通一次，才會完全交易成功
-    public function returnSuccess($transactionId){
+    public function returnSuccess($transactionId)
+    {
         $linePay = new \yidas\linePay\Client([
             'channelId' => $this->ChannelID,
             'channelSecret' => $this->ChannelSecret,
             'isSandbox' => (bool)$this->isSandbox,
         ]);
-        if(!$transactionId){
+        if (!$transactionId) {
             $this->ErrorMessage = "LINE Pay 交易編號有誤";
             return false;
         }
         //根據 Line交易ID 更新訂單資料
         $oTrade = new \App\Models\Trade\Trade();
-        $oTrade->where("Status","W");
-        $oTrade->where("ThirdPartyID",$transactionId);
+        $oTrade->where("Status", "W");
+        $oTrade->where("ThirdPartyID", $transactionId);
         $Data = $oTrade->first();
-        if(!$Data){
+        if (!$Data) {
             $this->ErrorMessage = "LINE Pay 交易編號找不到對應的訂單";
             return false;
         }
@@ -110,7 +113,7 @@ class LinePay
             "amount" => $Data["Price"],
             "currency" => 'TWD',
         ]);
-        if($response->toArray()["returnCode"]!="0000"){
+        if ($response->toArray()["returnCode"]!="0000") {
             //交易失敗
             $this->ErrorMessage = "LINE Pay 付款失敗";
             return false;
@@ -118,7 +121,7 @@ class LinePay
         //更新訂單為付款成功
         $oTrade = new \App\Models\Trade\Trade();
         $oTrade->protect(false);
-        $oTrade->update($Data["TradeID"],[
+        $oTrade->update($Data["TradeID"], [
             "Status"=>"P",//已付款
             "PaymentTime"=>date("Y-m-d H:i:s"),//付款時間
         ]);
@@ -128,6 +131,4 @@ class LinePay
         //
         return true;
     }
-
-
 }

@@ -2,7 +2,8 @@
 
 namespace App\Libraries\Payment;
 
-abstract class EcpayIsCollection {
-    const YES = 'Y';// 貨到付款
-    const NO = 'N';// 僅配送
+abstract class EcpayIsCollection
+{
+    public const YES = 'Y';// 貨到付款
+    public const NO = 'N';// 僅配送
 }

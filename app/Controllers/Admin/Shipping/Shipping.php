@@ -9,15 +9,17 @@ use CodeIgniter\API\ResponseTrait;
 class Shipping extends BaseController
 {
     use ResponseTrait;
-    public function getList(){
+    public function getList()
+    {
         //
         $oShipping = new \App\Models\Shipping\Shipping();
-        $oShipping->orderBy("ShippingID","DESC");
+        $oShipping->orderBy("ShippingID", "DESC");
         $List = $oShipping->findAll();
         //Res
         return $this->respond(ResponseData::success($List));
     }
-    public function update(){
+    public function update()
+    {
         //
         $ID = $this->request->getVar("ID");
         $Title = $this->request->getVar("Title");
@@ -34,7 +36,9 @@ class Shipping extends BaseController
         $oShipping = new \App\Models\Shipping\Shipping();
         //檢查ID
         $Data = $oShipping->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //開始更新
         $oShipping->protect(false);
         $updateData = [
@@ -49,16 +53,17 @@ class Shipping extends BaseController
             "DeliveryFrozen"=>$DeliveryFrozen,
             "QueryLink"=>$QueryLink,
         ];
-        $oShipping->update($ID,$updateData);
-        if($oShipping->errors()){
-            $ErrorMsg = implode(",",$oShipping->errors());
+        $oShipping->update($ID, $updateData);
+        if ($oShipping->errors()) {
+            $ErrorMsg = implode(",", $oShipping->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oShipping->find($ID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function create(){
+    public function create()
+    {
         //
         $Title = $this->request->getVar("Title");
         $ShippingType = $this->request->getVar("ShippingType");
@@ -86,31 +91,35 @@ class Shipping extends BaseController
             "QueryLink"=>$QueryLink,
         ];
         $ID = $oShipping->insert($insertData);
-        if($oShipping->errors()){
-            $ErrorMsg = implode(",",$oShipping->errors());
+        if ($oShipping->errors()) {
+            $ErrorMsg = implode(",", $oShipping->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oShipping->find($ID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function del($ID){
+    public function del($ID)
+    {
         //
         $oShipping = new \App\Models\Shipping\Shipping();
         //檢查ID
         $Data = $oShipping->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //開始刪除
         $oShipping->protect(false);
         $oShipping->delete($ID);
-        if($oShipping->errors()){
-            $ErrorMsg = implode(",",$oShipping->errors());
+        if ($oShipping->errors()) {
+            $ErrorMsg = implode(",", $oShipping->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         return $this->respond(ResponseData::success([]));
     }
-    public function getTypeList(){
+    public function getTypeList()
+    {
         $oShipping = new \App\Models\Shipping\Shipping();
         return $this->respond(ResponseData::success($oShipping->ShippingType));
     }

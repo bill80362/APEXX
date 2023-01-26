@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filters;
 
 use CodeIgniter\HTTP\RequestInterface;
@@ -11,12 +12,12 @@ class Member implements FilterInterface
     public function before(RequestInterface $request, $arguments = null)
     {
         $bearerToken = $request->getServer("HTTP_AUTHORIZATION");
-        $bearerToken = str_replace("Bearer ","",$bearerToken);
+        $bearerToken = str_replace("Bearer ", "", $bearerToken);
         $oMemberToken = new \App\Models\Member\MemberToken();
-        $oMemberToken->where("Token",$bearerToken);
-        $oMemberToken->where("ExpireTime >=",date("Y-m-d H:i:s"));
+        $oMemberToken->where("Token", $bearerToken);
+        $oMemberToken->where("ExpireTime >=", date("Y-m-d H:i:s"));
         $LoginResult = $oMemberToken->first();
-        if(!$LoginResult) {
+        if (!$LoginResult) {
             header("Access-Control-Allow-Origin:*");
             header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization");
             header('Access-Control-Allow-Methods: PUT, PATCH, POST, GET, DELETE, OPTIONS');

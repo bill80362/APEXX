@@ -9,9 +9,10 @@ use CodeIgniter\API\ResponseTrait;
 class Carousel extends BaseController
 {
     use ResponseTrait;
-    public function getList(){
+    public function getList()
+    {
         $oCarousel = new \App\Models\Carousel\Carousel();
-        $oCarousel->orderBy("Carousel.Seq","ASC");
+        $oCarousel->orderBy("Carousel.Seq", "ASC");
         $List = $oCarousel->findAll();
         //Res
         return $this->respond(ResponseData::success($List));

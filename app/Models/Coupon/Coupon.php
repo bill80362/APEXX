@@ -75,18 +75,19 @@ class Coupon extends Model
     protected $skipValidation     = false;
 
     //增減數量
-    public function ioCount(int $CouponID ,int $fixCount){
+    public function ioCount(int $CouponID, int $fixCount)
+    {
         $this->resetQuery();
         //增加或是減少
-        if($fixCount==0){
+        if ($fixCount==0) {
             return true;
-        }elseif($fixCount>0){
-            $this->set("CouponCount","CouponCount+".abs($fixCount),false);
-        }elseif($fixCount<0){
-            $this->set("CouponCount","CouponCount-".abs($fixCount),false);
+        } elseif ($fixCount>0) {
+            $this->set("CouponCount", "CouponCount+".abs($fixCount), false);
+        } elseif ($fixCount<0) {
+            $this->set("CouponCount", "CouponCount-".abs($fixCount), false);
         }
         //
-        $this->where("CouponID",$CouponID);
+        $this->where("CouponID", $CouponID);
         $this->update();
         return true;
     }

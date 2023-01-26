@@ -9,15 +9,17 @@ use CodeIgniter\API\ResponseTrait;
 class Payment extends BaseController
 {
     use ResponseTrait;
-    public function getList(){
+    public function getList()
+    {
         //
         $oPayment = new \App\Models\Payment\Payment();
-        $oPayment->orderBy("PaymentID","DESC");
+        $oPayment->orderBy("PaymentID", "DESC");
         $List = $oPayment->findAll();
         //Res
         return $this->respond(ResponseData::success($List));
     }
-    public function update(){
+    public function update()
+    {
         //
         $ID = $this->request->getVar("ID");
         $Status = $this->request->getVar("Status");
@@ -28,7 +30,9 @@ class Payment extends BaseController
         $oPayment = new \App\Models\Payment\Payment();
         //檢查ID
         $Data = $oPayment->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //開始更新
         $oPayment->protect(false);
         $updateData = [
@@ -37,9 +41,9 @@ class Payment extends BaseController
             "ChargeFee"=>$ChargeFee,
             "DeliveryFrozen"=>$DeliveryFrozen,
         ];
-        $oPayment->update($ID,$updateData);
-        if($oPayment->errors()){
-            $ErrorMsg = implode(",",$oPayment->errors());
+        $oPayment->update($ID, $updateData);
+        if ($oPayment->errors()) {
+            $ErrorMsg = implode(",", $oPayment->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res

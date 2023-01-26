@@ -6,14 +6,15 @@ use stdClass;
 
 class Editor extends BaseController
 {
-    public function a1(){
+    public function a1()
+    {
         echo 123;
     }
     public function editor()
     {
 //        try {
 //            $response = \FroalaEditor_Image::upload('/editor/');
-////            $cmp_image = (new imgcompress(SITE_PATH.'/portal/editor/' . explode("/", $response->link)[3], 1))->compressImg(SITE_PATH.'/portal/editor/' . explode("/", $response->link)[3]);
+        ////            $cmp_image = (new imgcompress(SITE_PATH.'/portal/editor/' . explode("/", $response->link)[3], 1))->compressImg(SITE_PATH.'/portal/editor/' . explode("/", $response->link)[3]);
 //            $response->link = $_ENV["app.baseURL"] . $response->link;
 //            echo stripslashes(json_encode($response));
 //        } catch (\Exception $e) {
@@ -25,7 +26,7 @@ class Editor extends BaseController
         $this->response->setHeader('Access-Control-Allow-Methods', 'PUT, PATCH, POST, GET, DELETE, OPTIONS');
 
         // Allowed extentions.
-        $allowedExts = array("gif", "jpeg", "jpg", "png","webp");
+        $allowedExts = ["gif", "jpeg", "jpg", "png","webp"];
 
         // Get filename.
         $temp = explode(".", $_FILES["file"]["name"]);
@@ -45,7 +46,7 @@ class Editor extends BaseController
                 || ($mime == "image/x-png")
                 || ($mime == "image/webp")
                 || ($mime == "image/png"))
-            && in_array($extension, $allowedExts)) {
+            && in_array($extension, $allowedExts, true)) {
             // Generate new random name.
             $name = sha1(microtime()) . "." . $extension;
 
@@ -53,12 +54,13 @@ class Editor extends BaseController
             move_uploaded_file($_FILES["file"]["tmp_name"], getcwd() . "/editor/" . $name);
 
             // Generate response.
-            $response = new StdClass;
+            $response = new StdClass();
             $response->link = "/editor/" . $name;
             echo stripslashes(json_encode($response));
         }
     }
-    public function getOptions(){
+    public function getOptions()
+    {
         $this->response->setHeader('Access-Control-Allow-Origin', '*');
         $this->response->setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
         $this->response->setHeader('Access-Control-Allow-Methods', 'PUT, PATCH, POST, GET, DELETE, OPTIONS');

@@ -9,30 +9,32 @@ use CodeIgniter\API\ResponseTrait;
 class Coupon extends BaseController
 {
     use ResponseTrait;
-    public function getList(){
+    public function getList()
+    {
         //
         $oCoupon = new \App\Models\Coupon\Coupon();
-        $oCoupon->orderBy("CouponID","DESC");
+        $oCoupon->orderBy("CouponID", "DESC");
         $List = $oCoupon->findAll();
         //
         $TradeKeyValue = [];
-        if($List){
+        if ($List) {
             //訂單使用紀錄
-            $FilterIDArray = array_column($List,"CouponID");
+            $FilterIDArray = array_column($List, "CouponID");
             $oTrade = new \App\Models\Trade\Trade();
-            $oTrade->where("CouponID <>","0");
-            $oTrade->whereIn("CouponID",$FilterIDArray);
+            $oTrade->where("CouponID <>", "0");
+            $oTrade->whereIn("CouponID", $FilterIDArray);
             $Temp = $oTrade->findAll();
-            $TradeKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp,"CouponID");
+            $TradeKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "CouponID");
         }
         //
-        foreach ($List as $key=>$value){
+        foreach ($List as $key=>$value) {
             $List[$key]["TradeList"] = $TradeKeyValue[$value["CouponID"]]??[];
         }
         //Res
         return $this->respond(ResponseData::success($List));
     }
-    public function create(){
+    public function create()
+    {
         //
         $CouponNumber = $this->request->getVar("CouponNumber");
         $Title = $this->request->getVar("Title");
@@ -59,15 +61,16 @@ class Coupon extends BaseController
             "Status"=>$Status,
             "CouponCount"=>$CouponCount,
         ]);
-        if($oCoupon->errors()){
-            $ErrorMsg = implode(",",$oCoupon->errors());
+        if ($oCoupon->errors()) {
+            $ErrorMsg = implode(",", $oCoupon->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oCoupon->find($CouponID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function update(){
+    public function update()
+    {
         //
         $ID = $this->request->getVar("ID");
         $CouponNumber = $this->request->getVar("CouponNumber");
@@ -84,7 +87,9 @@ class Coupon extends BaseController
         $oCoupon = new \App\Models\Coupon\Coupon();
         //檢查ID
         $Data = $oCoupon->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //開始更新
         $oCoupon->protect(false);
         $updateData = [
@@ -99,36 +104,39 @@ class Coupon extends BaseController
             "Status"=>$Status,
             "CouponCount"=>$CouponCount,
         ];
-        $oCoupon->update($ID,$updateData);
-        if($oCoupon->errors()){
-            $ErrorMsg = implode(",",$oCoupon->errors());
+        $oCoupon->update($ID, $updateData);
+        if ($oCoupon->errors()) {
+            $ErrorMsg = implode(",", $oCoupon->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oCoupon->find($ID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function del($ID){
+    public function del($ID)
+    {
         //
         $oCoupon = new \App\Models\Coupon\Coupon();
         //檢查ID
         $Data = $oCoupon->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //刪除原本圖檔
-        if( isset($Data["Image1"]) && $Data["Image1"]!="" ){
+        if (isset($Data["Image1"]) && $Data["Image1"]!="") {
             $FileHostPath = ROOTPATH."public".$Data["Image1"];
-            if(file_exists($FileHostPath))
+            if (file_exists($FileHostPath)) {
                 unlink($FileHostPath);
+            }
         }
         //刪除DB
         $oCoupon->protect(false);
         $oCoupon->delete($ID);
-        if($oCoupon->errors()){
-            $ErrorMsg = implode(",",$oCoupon->errors());
+        if ($oCoupon->errors()) {
+            $ErrorMsg = implode(",", $oCoupon->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         return $this->respond(ResponseData::success([]));
     }
-
 }

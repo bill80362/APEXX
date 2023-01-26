@@ -23,7 +23,7 @@ class Discount extends Model
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
 
-    static public $DiscountTypeTxt = [
+    public static $DiscountTypeTxt = [
         "P"=>"打折",
         "G"=>"贈品",
         "D"=>"免運",

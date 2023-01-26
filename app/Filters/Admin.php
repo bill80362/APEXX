@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filters;
 
 use CodeIgniter\HTTP\RequestInterface;
@@ -11,12 +12,12 @@ class Admin implements FilterInterface
     public function before(RequestInterface $request, $arguments = null)
     {
         $bearerToken = $request->getServer("HTTP_AUTHORIZATION");
-        $bearerToken = str_replace("Bearer ","",$bearerToken);
+        $bearerToken = str_replace("Bearer ", "", $bearerToken);
         $oAdminToken = new \App\Models\AdminToken();
-        $oAdminToken->where("Token",$bearerToken);
-        $oAdminToken->where("ExpireTime >=",date("Y-m-d H:i:s"));
+        $oAdminToken->where("Token", $bearerToken);
+        $oAdminToken->where("ExpireTime >=", date("Y-m-d H:i:s"));
         $LoginResult = $oAdminToken->first();
-        if(!$LoginResult) {
+        if (!$LoginResult) {
             header("Access-Control-Allow-Origin:*");
             header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization");
             header('Access-Control-Allow-Methods: PUT, PATCH, POST, GET, DELETE, OPTIONS');

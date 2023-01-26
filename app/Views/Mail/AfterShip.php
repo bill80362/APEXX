@@ -447,7 +447,7 @@
 
 													<table style="width:100%;font-size:12px;">
 														<tbody>
-															<? foreach ($SubTradeList as $SubTrade) {?>
+															<?php foreach ($SubTradeList as $SubTrade) {?>
 															<!-- 一個商品開始 -->
 															<tr>
 																<td
@@ -472,7 +472,7 @@
 																</td>
 															</tr>
 															<!-- 一個商品結束 -->
-															<? } ?>
+															<?php } ?>
 															<!-- 運費開始 -->
 															<tr>
 																<td
@@ -797,20 +797,20 @@
 														電話：
 														<?=$TradeData["ReceiverPhone"]?>
 													</p>
-													<? if($TradeData["ShippingCode"]) { ?>
+													<?php if ($TradeData["ShippingCode"]) { ?>
 													<p
 														style="line-height: 2; word-break: break-word; mso-line-height-alt: NaNpx; margin: 0;">
-														<? if($TradeData["QueryLink"]) { ?>
+														<?php if ($TradeData["QueryLink"]) { ?>
 														<a target="_blank" href="<?=$TradeData["
 															QueryLink"].$TradeData["ShippingCode"]?>">物流編號：
 															<?=$TradeData["ShippingCode"]?>
 														</a>
-														<? }else{ ?>
+														<?php } else { ?>
 														物流編號：
 														<?=$TradeData["ShippingCode"]?>
-														<? } ?>
+														<?php } ?>
 													</p>
-													<? } ?>
+													<?php } ?>
 													<p
 														style="line-height: 2; word-break: break-word; mso-line-height-alt: NaNpx; margin: 0;">
 														備註：

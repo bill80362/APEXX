@@ -9,16 +9,18 @@ use CodeIgniter\API\ResponseTrait;
 class WebLink extends BaseController
 {
     use ResponseTrait;
-    public function getList(){
+    public function getList()
+    {
         //
         $oWebLink = new \App\Models\WebLink\WebLink();
         $oWebLink->orderBy("Seq");
-        $oWebLink->orderBy("WebLinkID","DESC");
+        $oWebLink->orderBy("WebLinkID", "DESC");
         $List = $oWebLink->findAll();
         //Res
         return $this->respond(ResponseData::success($List));
     }
-    public function create(){
+    public function create()
+    {
         //
         $CategoryID = $this->request->getVar("CategoryID");
         $Title = $this->request->getVar("Title");
@@ -28,7 +30,9 @@ class WebLink extends BaseController
         //檢查目錄ID
         $oCategory = new \App\Models\WebLink\Category();
         $Data = $oCategory->find($CategoryID);
-        if(!$Data) return $this->respond(ResponseData::fail("目錄ID有誤"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("目錄ID有誤"));
+        }
         //
         $oWebLink = new \App\Models\WebLink\WebLink();
         $oWebLink->protect(false);
@@ -39,15 +43,16 @@ class WebLink extends BaseController
             "Status"=>$Status,
             "Link"=>$Link,
         ]);
-        if($oWebLink->errors()){
-            $ErrorMsg = implode(",",$oWebLink->errors());
+        if ($oWebLink->errors()) {
+            $ErrorMsg = implode(",", $oWebLink->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oWebLink->find($WebLinkID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function update(){
+    public function update()
+    {
         //
         $ID = $this->request->getVar("ID");
         $Title = $this->request->getVar("Title");
@@ -58,48 +63,55 @@ class WebLink extends BaseController
         $oWebLink = new \App\Models\WebLink\WebLink();
         //檢查ID
         $Data = $oWebLink->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //開始更新
         $oWebLink->protect(false);
-        $oWebLink->update($ID,[
+        $oWebLink->update($ID, [
             "Title"=>$Title,
             "Seq"=>$Seq,
             "Status"=>$Status,
             "Link"=>$Link,
         ]);
-        if($oWebLink->errors()){
-            $ErrorMsg = implode(",",$oWebLink->errors());
+        if ($oWebLink->errors()) {
+            $ErrorMsg = implode(",", $oWebLink->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oWebLink->find($ID);
         return $this->respond(ResponseData::success($Data));
-
     }
-    public function del($ID){
+    public function del($ID)
+    {
         //
         $oWebLink = new \App\Models\WebLink\WebLink();
         //檢查ID
         $Data = $oWebLink->find($ID);
-        if(!$Data) return $this->respond(ResponseData::fail("找不到該筆資料"));
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("找不到該筆資料"));
+        }
         //開始刪除
         $oWebLink->protect(false);
         $oWebLink->delete($ID);
-        if($oWebLink->errors()){
-            $ErrorMsg = implode(",",$oWebLink->errors());
+        if ($oWebLink->errors()) {
+            $ErrorMsg = implode(",", $oWebLink->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         return $this->respond(ResponseData::success([]));
     }
-    public function updateSeqBatch(){
+    public function updateSeqBatch()
+    {
         $SeqArray = $this->request->getVar();
-        if(!is_array($SeqArray)) return $this->respond(ResponseData::fail("資料須為陣列"));
+        if (!is_array($SeqArray)) {
+            return $this->respond(ResponseData::fail("資料須為陣列"));
+        }
         //更新排序
         $oWebLink = new \App\Models\WebLink\WebLink();
         $oWebLink->protect(false);
-        foreach ($SeqArray as $key=>$Data){
-            $oWebLink->update($Data->ID,["Seq"=>$Data->Seq]);
+        foreach ($SeqArray as $key=>$Data) {
+            $oWebLink->update($Data->ID, ["Seq"=>$Data->Seq]);
         }
         //Res
         return $this->respond(ResponseData::success([]));

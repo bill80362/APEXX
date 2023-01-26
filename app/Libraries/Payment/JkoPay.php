@@ -26,7 +26,8 @@ class JkoPay
     protected $ch;
     public $PreCode = "AAAAA";//會轉成隨機alnum
     public $ErrorMessage = "";
-    public function __construct(){
+    public function __construct()
+    {
         $this->ch = curl_init();
         //帳號密碼
         $this->URL = $_ENV["jkopay.URL"];
@@ -46,7 +47,8 @@ class JkoPay
         curl_close($this->ch);
     }
     //
-    public function getLink($Data,$Device){
+    public function getLink($Data, $Device)
+    {
         //
         $ThirdPartyID = $this->PreCode.$Data["TradeID"];
         //JKO
@@ -57,47 +59,49 @@ class JkoPay
         }
         //填入訂單對應LinePay的ID
         $oTrade = new \App\Models\Trade\Trade();
-        $oTrade->update($Data["TradeID"],[
+        $oTrade->update($Data["TradeID"], [
             "ThirdPartyID"=> $ThirdPartyID,
         ]);
         //
-        if($Device=="PC"){
+        if ($Device=="PC") {
             return $JkoResponse["result_object"]["payment_url"];
-        }else{
+        } else {
             return $JkoResponse["result_object"]["qr_img"];
         }
     }
     //通用Curl
-    public function goCURL($Path,$Method,$PostData = []){
+    public function goCURL($Path, $Method, $PostData = [])
+    {
         //DIGEST
         //1. 將字串 的 request payload以 UTF-8編 碼。
         //2. 將街口提供 串接使用 的 Secret key以 UTF-8編碼 。
         //3. 將步驟 1產生的 字節 透過 HMAC-SHA256 演算法，以 步驟 2的字節 作為秘密鑰匙進行 加簽 ，即產生 hexdigest作為 digest。
         $PostDataTxt = json_encode($PostData);
 //        $this->SecretKey = utf8_encode($this->SecretKey);
-        $DIGEST = hash_hmac('sha256',$PostDataTxt,$this->SecretKey);
+        $DIGEST = hash_hmac('sha256', $PostDataTxt, $this->SecretKey);
         //
         $Header = [
             'Content-type: application/json',
             'API-KEY: '.$this->APIKey,
             'DIGEST: '.$DIGEST,
         ];
-        curl_setopt( $this->ch , CURLOPT_URL , $this->URL.$Path);
-        curl_setopt( $this->ch , CURLOPT_HTTPHEADER, $Header);
-        curl_setopt( $this->ch , CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->ch, CURLOPT_URL, $this->URL.$Path);
+        curl_setopt($this->ch, CURLOPT_HTTPHEADER, $Header);
+        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
 //        curl_setopt( $this->ch , CURLOPT_HEADER, true);
-        if($Method=="POST"){
-            curl_setopt( $this->ch , CURLOPT_POST, true);
-            curl_setopt( $this->ch , CURLOPT_POSTFIELDS, $PostDataTxt );
-        }else{
-            curl_setopt( $this->ch , CURLOPT_POST, false);
+        if ($Method=="POST") {
+            curl_setopt($this->ch, CURLOPT_POST, true);
+            curl_setopt($this->ch, CURLOPT_POSTFIELDS, $PostDataTxt);
+        } else {
+            curl_setopt($this->ch, CURLOPT_POST, false);
         }
-        $rs = curl_exec( $this->ch );
-        $rs = json_decode($rs,true);
+        $rs = curl_exec($this->ch);
+        $rs = json_decode($rs, true);
         return $rs;
     }
     //3.2街口支付訂單 創建 Entry API
-    public function createOrder($OrderID,$Price){
+    public function createOrder($OrderID, $Price)
+    {
         $PostData = [
             //(必要參數)
             "platform_order_id"=> $OrderID,//電商平台端交易序號需為唯一值，不可重複
@@ -112,6 +116,6 @@ class JkoPay
             //(非必要)消費者付款完成後點選完成按鈕，將消費者導向此電商平台客戶端付款結果頁網址。
 //            "result_display_url"=>"https://www.ladymint.com/credit/jkopay_success.php",
         ];
-        return $this->goCURL("/platform/entry","POST",$PostData);
+        return $this->goCURL("/platform/entry", "POST", $PostData);
     }
 }

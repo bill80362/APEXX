@@ -15,30 +15,30 @@ class Login extends BaseController
         $Password = $this->request->getVar("Password");
         //
         $oMember = new \App\Models\Member\Member();
-        $oMember->where("Account",$Account);
-        $oMember->where("Password",$Password);
+        $oMember->where("Account", $Account);
+        $oMember->where("Password", $Password);
         $MemberData = $oMember->first();
         //驗證帳密
-        if($MemberData){
+        if ($MemberData) {
             //登入成功
             helper('text');
             $newToken = random_string('md5');
             //作廢可以使用的Token
             $oMemberToken = new \App\Models\Member\MemberToken();
             $oMemberToken->protect(false);
-            $oMemberToken->where("MemberID",$MemberData["MemberID"]);
-            $oMemberToken->where("ExpireTime >=",date("Y-m-d H:i:s"));
+            $oMemberToken->where("MemberID", $MemberData["MemberID"]);
+            $oMemberToken->where("ExpireTime >=", date("Y-m-d H:i:s"));
             $List = $oMemberToken->findAll();
-            foreach ($List as $Data){
+            foreach ($List as $Data) {
                 $oMemberToken->resetQuery();
-                $oMemberToken->update($Data["MemberTokenID"],["ExpireTime"=>date("Y-m-d H:i:s")]);
+                $oMemberToken->update($Data["MemberTokenID"], ["ExpireTime"=>date("Y-m-d H:i:s")]);
             }
             //建立新Token
             $oMemberToken->resetQuery();
             $oMemberToken->insert([
                 "MemberID"=>$MemberData["MemberID"],
                 "Token"=>$newToken,
-                "ExpireTime"=> date("Y-m-d H:i:s",strtotime("+1 day"))
+                "ExpireTime"=> date("Y-m-d H:i:s", strtotime("+1 day"))
             ]);
             $oMemberToken->protect(true);
             //Res
@@ -48,26 +48,28 @@ class Login extends BaseController
             return $this->respond(ResponseData::success($ResData));
         }
         //Res
-        return $this->respond(ResponseData::fail("登入失敗",301));
+        return $this->respond(ResponseData::fail("登入失敗", 301));
     }
-    public function logout(){
+    public function logout()
+    {
         //取得登入身份
         $LoginMemberID = \Config\Services::getLoginMember()->getID();
         //作廢可以使用的Token
         $oMemberToken = new \App\Models\Member\MemberToken();
         $oMemberToken->protect(false);
-        $oMemberToken->where("MemberID",$LoginMemberID);
-        $oMemberToken->where("ExpireTime >=",date("Y-m-d H:i:s"));
+        $oMemberToken->where("MemberID", $LoginMemberID);
+        $oMemberToken->where("ExpireTime >=", date("Y-m-d H:i:s"));
         $List = $oMemberToken->findAll();
-        foreach ($List as $Data){
+        foreach ($List as $Data) {
             $oMemberToken->resetQuery();
-            $oMemberToken->update($Data["MemberTokenID"],["ExpireTime"=>date("Y-m-d H:i:s")]);
+            $oMemberToken->update($Data["MemberTokenID"], ["ExpireTime"=>date("Y-m-d H:i:s")]);
         }
         //
         //Res
         return $this->respond(ResponseData::success("登出成功"));
     }
-    public function register(){
+    public function register()
+    {
         //
         $Account = $this->request->getVar("Account");
         $Password = $this->request->getVar("Password");
@@ -89,26 +91,29 @@ class Login extends BaseController
             "Sex"=>$Sex,
             "Status"=>"Y",
         ]);
-        if($oMember->errors()){
-            $ErrorMsg = implode(",",$oMember->errors());
+        if ($oMember->errors()) {
+            $ErrorMsg = implode(",", $oMember->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
         $Data = $oMember->find($ID);
         return $this->respond(ResponseData::success($Data));
     }
-    public function forgetPassword(){
+    public function forgetPassword()
+    {
         $Account = $this->request->getVar("Account");
         //
         $oMember = new \App\Models\Member\Member();
-        $oMember->where("Account",$Account);
+        $oMember->where("Account", $Account);
         $MemberData = $oMember->first();
-        if(!$MemberData) return $this->respond(ResponseData::fail("找不到此帳號"));
+        if (!$MemberData) {
+            return $this->respond(ResponseData::fail("找不到此帳號"));
+        }
         //
         helper('text');
-        $newPassword = random_string('alnum',6);
+        $newPassword = random_string('alnum', 6);
         $oMember->protect(false);
-        $oMember->update($MemberData["MemberID"],[
+        $oMember->update($MemberData["MemberID"], [
             "Password" => $newPassword,
         ]);
         //寄出密碼
@@ -122,9 +127,11 @@ class Login extends BaseController
         $HTML_Contact = view('/Mail/ForgetPassword', $ViewData);
         //寄信
         $oMail = new \App\Libraries\Tools\Mail();
-        $rs = $oMail->send($MemberData["Account"],"耀聞水果世界密碼重置通知",$HTML_Contact);//給客戶
+        $rs = $oMail->send($MemberData["Account"], "耀聞水果世界密碼重置通知", $HTML_Contact);//給客戶
         //
-        if(!$rs)return $this->respond(ResponseData::fail($oMail->ErrorMsg));
+        if (!$rs) {
+            return $this->respond(ResponseData::fail($oMail->ErrorMsg));
+        }
         //Res
         return $this->respond(ResponseData::success([]));
     }

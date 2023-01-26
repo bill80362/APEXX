@@ -9,9 +9,10 @@ use CodeIgniter\API\ResponseTrait;
 class Mascot extends BaseController
 {
     use ResponseTrait;
-    public function getList(){
+    public function getList()
+    {
         $oMascot = new \App\Models\Mascot\Mascot();
-        $oMascot->orderBy("Mascot.Seq","ASC");
+        $oMascot->orderBy("Mascot.Seq", "ASC");
         $List = $oMascot->findAll();
         //Res
         return $this->respond(ResponseData::success($List));
