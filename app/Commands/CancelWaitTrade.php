@@ -9,7 +9,7 @@ class CancelWaitTrade extends BaseCommand
 {
     protected $group       = 'demo';
     protected $name        = 'app:CancelWaitTrade';
-    protected $description = '黑鑽名單重置';
+    protected $description = '自動取消訂單中尚未付款的訂單';
     //   /usr/bin/php /home/winner/spark app:CancelWaitTrade
     public function run(array $params)
     {

@@ -9,7 +9,7 @@ class MailWaitTrade extends BaseCommand
 {
     protected $group       = 'demo';
     protected $name        = 'app:MailWaitTrade';
-    protected $description = '黑鑽名單重置';
+    protected $description = '訂單尚未繳款通知';
     //   /usr/bin/php /home/winner/spark app:MailWaitTrade
     public function run(array $params)
     {
