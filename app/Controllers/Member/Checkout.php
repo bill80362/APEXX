@@ -87,6 +87,9 @@ class Checkout extends BaseController
         $PaymentID = $this->request->getVar("PaymentID");//金流
         $ShippingID = $this->request->getVar("ShippingID");//物流
         $ShoppingCart = $this->request->getJsonVar("ShoppingCart", true);//購物車
+        //購買人資訊
+        $BuyerName = $this->request->getVar("BuyerName");//姓名
+        $BuyerPhone = $this->request->getVar("BuyerPhone");//電話
         //收件人資訊
         $ReceiverName = $this->request->getVar("ReceiverName");//姓名
         $ReceiverPhone = $this->request->getVar("ReceiverPhone");//電話
@@ -143,6 +146,9 @@ class Checkout extends BaseController
             "ShippingFree"=>$oLibCheckout->ShippingFree ? "Y" : "N",
             //價格
             "Price"=>$TradePrice,
+            //購買人
+            "BuyerName"=>$BuyerName,
+            "BuyerPhone"=>$BuyerPhone,
             //收件人資訊
             "ReceiverName"=>$ReceiverName,
             "ReceiverPhone"=>$ReceiverPhone,

@@ -34,6 +34,8 @@ class Trade extends Model
         "DiscountID_Ｇ" => "required|numeric",
         "DiscountID_D" => "required|numeric",
         "Price" => "required|numeric",
+        "BuyerName" => "required",
+        "BuyerPhone" => "required",
         "ReceiverName" => "required",
         "ReceiverPhone" => "required",
         "ReceiverEmail" => "required|valid_email",

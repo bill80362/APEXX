@@ -65,6 +65,8 @@ class Trade extends BaseController
         $ShippingTime = $this->request->getVar("ShippingTime");
         $ShippingCode = $this->request->getVar("ShippingCode");
         $PaymentTime = $this->request->getVar("PaymentTime");
+        $BuyerName = $this->request->getVar("BuyerName");//姓名
+        $BuyerPhone = $this->request->getVar("BuyerPhone");//電話
         $ReceiverName = $this->request->getVar("ReceiverName");
         $ReceiverPhone = $this->request->getVar("ReceiverPhone");
         $ReceiverEmail = $this->request->getVar("ReceiverEmail");
@@ -97,6 +99,11 @@ class Trade extends BaseController
         if ($PaymentTime!==null) {
             $updateData["PaymentTime"] = $PaymentTime;
         }
+        //購買人資訊
+        if($BuyerName!==NULL)
+            $updateData["BuyerName"] = $BuyerName;
+        if($BuyerPhone!==NULL)
+            $updateData["BuyerPhone"] = $BuyerPhone;
         //收件人資訊
         if ($ReceiverName!==null) {
             $updateData["ReceiverName"] = $ReceiverName;

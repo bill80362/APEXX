@@ -13,11 +13,13 @@ class NonMember extends BaseController
     {
         //
         $TradeID = $this->request->getVar("TradeID");
-        $ReceiverPhone = $this->request->getVar("ReceiverPhone");
+//        $ReceiverPhone = $this->request->getVar("ReceiverPhone");
+        $BuyerPhone = $this->request->getVar("BuyerPhone");
         //
         $oTrade = new \App\Models\Trade\Trade();
         $oTrade->where("MemberID", "0");//非會員
-        $oTrade->where("ReceiverPhone", $ReceiverPhone);
+//        $oTrade->where("ReceiverPhone", $ReceiverPhone);
+        $oTrade->where("BuyerPhone",$BuyerPhone);
         $Data = $oTrade->find($TradeID);
         if (!$Data) {
             return $this->respond(ResponseData::fail("查無訂單資訊"));
