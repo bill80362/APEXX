@@ -1,33 +1,79 @@
+--
+-- 資料表結構 `Goods`
+--
 CREATE TABLE `Goods` (
   `GoodsID` int(11) NOT NULL,
-  `Title` varchar(100) NOT NULL,
-  `SubTitle` varchar(100) NOT NULL,
-  `Description` text NOT NULL,
-  `Image1` varchar(100) NOT NULL,
-  `Image2` varchar(100) NOT NULL,
-  `Link` varchar(200) NOT NULL,
-  `Seq` int(11) NOT NULL,
+  `GoodsTimeStart` timestamp NULL DEFAULT NULL COMMENT '限制開賣時間',
+  `GoodsTimeEnd` timestamp NULL DEFAULT NULL COMMENT '限制開賣時間',
+  `Title` varchar(100) NOT NULL COMMENT '商品名稱',
+  `Description` text NOT NULL COMMENT '商品資訊',
+  `Memo1` text NOT NULL COMMENT '商品詳細介紹',
+  `Memo2` text NOT NULL COMMENT '商品規格介紹',
+  `Memo3` text NOT NULL COMMENT '商品運送資訊',
+  `Image1` varchar(100) NOT NULL COMMENT '商品封面圖1',
+  `Image2` varchar(100) NOT NULL COMMENT '商品封面圖2',
+  `Status` char(1) NOT NULL COMMENT '開關',
+  `IsCustom` char(1) NOT NULL COMMENT '是否為客製化商品',
+  `CombineDiscount` char(1) NOT NULL COMMENT '組合商品優惠',
+  `Seq` int(11) NOT NULL COMMENT '排序',
+  `Option1` varchar(200) NOT NULL,
+  `Option2` varchar(200) NOT NULL,
+  `DeliveryFrozen` char(1) NOT NULL COMMENT '是否為低溫商品',
+  `RecommendMenuID` int(11) NOT NULL COMMENT '推薦選單ID',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- 已傾印資料表的索引
---
 
---
--- 資料表索引 `Goods`
---
 ALTER TABLE `Goods`
   ADD PRIMARY KEY (`GoodsID`);
 
---
--- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
---
 
---
--- 使用資料表自動遞增(AUTO_INCREMENT) `Goods`
---
 ALTER TABLE `Goods`
   MODIFY `GoodsID` int(11) NOT NULL AUTO_INCREMENT;
-COMMIT;
+
+--
+-- 資料表結構 `GoodsStock`
+--
+CREATE TABLE `GoodsStock` (
+  `GoodsID` int(11) NOT NULL,
+  `ColorID` int(11) NOT NULL,
+  `SizeID` int(11) NOT NULL,
+  `Stock` int(11) NOT NULL,
+  `Status` char(1) NOT NULL,
+  `DeliverVolume` int(11) NOT NULL COMMENT '體積',
+  `DeliverWeight` int(11) NOT NULL COMMENT '重量',
+  `Price` int(11) NOT NULL COMMENT '原價',
+  `SellPrice` int(11) NOT NULL COMMENT '售價',
+  `MemberSellPrice` int(11) NOT NULL COMMENT '會員售價',
+  `Seq` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品庫存';
+
+
+ALTER TABLE `GoodsStock`
+  ADD PRIMARY KEY (`GoodsID`,`ColorID`,`SizeID`);
+
+--
+-- 資料表結構 `GoodsPicture`
+--
+CREATE TABLE `GoodsPicture` (
+  `GoodsPictureID` int(11) NOT NULL,
+  `GoodsID` int(11) NOT NULL,
+  `ColorID` int(11) NOT NULL,
+  `SizeID` int(11) NOT NULL,
+  `Image` varchar(200) NOT NULL,
+  `Seq` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+ALTER TABLE `GoodsPicture`
+  ADD PRIMARY KEY (`GoodsPictureID`);
+
+
+ALTER TABLE `GoodsPicture`
+  MODIFY `GoodsPictureID` int(11) NOT NULL AUTO_INCREMENT;
