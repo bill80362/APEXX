@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Models\Goods;
+namespace App\Models\CustomGoods;
 
 use CodeIgniter\Model;
 
-class Goods extends Model
+class CustomGoodsSpecCategory extends Model
 {
-    protected $table      = 'Goods';
-    protected $primaryKey = 'GoodsID';
+    protected $table      = 'CustomGoodsSpecCategory';
+    protected $primaryKey = 'SpecCategoryID';
 
     protected $useAutoIncrement = true;
 
     protected $returnType     = 'array';
-    protected $useSoftDeletes = true;
+    protected $useSoftDeletes = false;
 
     protected $allowedFields = [
 
@@ -25,27 +25,19 @@ class Goods extends Model
 
     protected $validationRules    = [
         "Seq" => "required|numeric",
+        "Title" => "required",
         "Status" => "in_list[Y,N]",
-        "CombineDiscount" => "in_list[Y,N]",
-        "DeliveryFrozen" => "in_list[Y,N]",
-        "IsCustom" => "in_list[Y,N]",
     ];
     protected $validationMessages = [
         "Seq" => [
             "required" => "排序權重為必填",
             "numeric" => "排序權重必須是整數",
         ],
+        "Title" => [
+            "required" => "名稱為必填",
+        ],
         "Status" =>[
             "in_list"=> "開關只能是Y,N",
-        ],
-        "CombineDiscount" =>[
-            "in_list"=> "是否為組合商品Y,N",
-        ],
-        "DeliveryFrozen" =>[
-            "in_list"=> "是否為低溫商品Y,N",
-        ],
-        "IsCustom" =>[
-            "in_list"=> "是否為客製化商品Y,N",
         ],
     ];
     protected $skipValidation     = false;

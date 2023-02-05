@@ -14,9 +14,10 @@ class Goods extends BaseController
     {
         // 23.0109 彥佐修改，因後台商品資料原本沒有帶庫存數量，客戶希望商品列表能顯示庫存數量
         $oGoods = new \App\Models\Goods\Goods();
-        $oGoods->select("Goods.*,SUM(GoodsStock.Stock) AS StockSum");
+        $oGoods->select("Goods.*,SUM(GoodsStock.Stock) AS StockSum,SUM(CustomGoodsStock.Stock) AS CustomGoodsStockSum");
         $oGoods->withDeleted();
         $oGoods->join("GoodsStock", "GoodsStock.GoodsID=Goods.GoodsID", "left");
+        $oGoods->join("CustomGoodsStock", "CustomGoodsStock.GoodsID=Goods.GoodsID", "left");
         $oGoods->groupBy("Goods.GoodsID");
         $oGoods->orderBy("Goods.Seq");
         $oGoods->orderBy("Goods.GoodsID", "DESC");
@@ -58,12 +59,48 @@ class Goods extends BaseController
             if (count($Temp) > 0) {
                 $GoodsStockKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
             }
+            // 關聯客製化商品庫存
+            $CustomGoodsStockKeyValue = [];
+            $GoodsIDArray       = array_column($List, "GoodsID");
+            $oCustomGoodsStock  = new \App\Models\CustomGoods\CustomGoodsStock();
+            $oCustomGoodsStock->whereIn("CustomGoodsStock.GoodsID", $GoodsIDArray);
+            $oCustomGoodsStock->orderBy("CustomGoodsStock.Seq", "ASC");
+            $Temp = $oCustomGoodsStock->findAll();
+            if (count($Temp) > 0) {
+                // 依據關聯的"客製規格編號"，找出"客製規格"及""客製規格分類"資料
+                $oSpec = new \App\Models\CustomGoods\CustomGoodsSpec();
+                foreach ($Temp as $key=>$Data) {
+                    $CustomSpecIDArray = explode(",", $Temp[$key]["CustomSpecID"]);
+                    if (count($CustomSpecIDArray)>0) {
+                        $oSpec->resetQuery();
+                        $oSpec->select("CustomGoodsSpec.CustomSpecID");
+                        $oSpec->select("CustomGoodsSpec.Title AS SpecTitle");
+                        $oSpec->select("CustomGoodsSpec.Status AS SpecStatus");
+                        $oSpec->select("CustomGoodsSpec.Seq AS SpecSeq");
+                        $oSpec->select("CustomGoodsSpec.SpecCategoryID");
+                        $oSpec->select("CustomGoodsSpecCategory.Title AS SpecCategoryTitle");
+                        $oSpec->select("CustomGoodsSpecCategory.Status AS SpecCategoryStatus");
+                        $oSpec->select("CustomGoodsSpecCategory.Seq AS SpecCategorySeq");
+                        $oSpec->join("CustomGoodsSpecCategory", "CustomGoodsSpecCategory.SpecCategoryID=CustomGoodsSpec.SpecCategoryID");
+                        $oSpec->whereIn("CustomSpecID", $CustomSpecIDArray);
+                        $oSpec->orderBy("CustomGoodsSpec.Seq");
+                        $oSpec->orderBy("CustomGoodsSpecCategory.Seq");
+                        $oSpec->orderBy("CustomSpecID", "DESC");
+                        $Temp[$key]["SpecArray"] = $oSpec->findAll();
+                    } else {
+                        $Temp[$key]["SpecArray"] = [];
+                    }
+                }
+
+                $CustomGoodsStockKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
+            }
         }
         //放入資料
         foreach ($List as $key => $Data) {
             $List[$key]["Menu"] = $Menu2GoodsKeyValue[$List[$key]["GoodsID"]] ?? [];
             // 關聯庫存，23.0109 彥佐加上，因後台商品資料原本沒有帶庫存資料導致訂單取不到庫存資料
             $List[$key]["Stock"] = $GoodsStockKeyValue[$List[$key]["GoodsID"]] ?? [];
+            $List[$key]["CustomGoodsStock"] = $CustomGoodsStockKeyValue[$List[$key]["GoodsID"]] ?? [];
 //            $List[$key]["TradeList"] = $TradeKeyValue[$List[$key]["GoodsID"]]??[];
         }
         //Res
@@ -83,6 +120,7 @@ class Goods extends BaseController
         $Option1         = $this->request->getVar("Option1");
         $Option2         = $this->request->getVar("Option2");
         $Status          = $this->request->getVar("Status");
+        $IsCustom        = $this->request->getVar("IsCustom");
         $CombineDiscount = $this->request->getVar("CombineDiscount");
         $DeliveryFrozen  = $this->request->getVar("DeliveryFrozen");
         $RecommendMenuID = $this->request->getVar("RecommendMenuID");
@@ -111,6 +149,7 @@ class Goods extends BaseController
             "Option1"         => $Option1,
             "Option2"         => $Option2,
             "Status"          => $Status,
+            "IsCustom"        => $IsCustom,
             "CombineDiscount" => $CombineDiscount,
             "DeliveryFrozen"  => $DeliveryFrozen,
             "RecommendMenuID" => $RecommendMenuID,
@@ -141,6 +180,7 @@ class Goods extends BaseController
         $Option1         = $this->request->getVar("Option1");
         $Option2         = $this->request->getVar("Option2");
         $Status          = $this->request->getVar("Status");
+        $IsCustom        = $this->request->getVar("IsCustom");
         $CombineDiscount = $this->request->getVar("CombineDiscount");
         $DeliveryFrozen  = $this->request->getVar("DeliveryFrozen");
         $RecommendMenuID = $this->request->getVar("RecommendMenuID");
@@ -174,6 +214,7 @@ class Goods extends BaseController
             "Option1"         => $Option1,
             "Option2"         => $Option2,
             "Status"          => $Status,
+            "IsCustom"        => $IsCustom,
             "CombineDiscount" => $CombineDiscount,
             "DeliveryFrozen"  => $DeliveryFrozen,
             "RecommendMenuID" => $RecommendMenuID,

@@ -21,6 +21,10 @@ class Stock extends BaseController
         $oGoodsStock->join("Color", "Color.ColorID=GoodsStock.ColorID");
         $oGoodsStock->join("Size", "Size.SizeID=GoodsStock.SizeID");
         $oGoodsStock->where("GoodsStock.GoodsID", $GoodsID);
+        $oGoodsStock->groupStart();
+        $oGoodsStock->where("Goods.IsCustom", "N");
+        $oGoodsStock->orWhere("Goods.IsCustom", "");
+        $oGoodsStock->groupEnd();
         $oGoodsStock->orderBy("GoodsStock.Seq", "ASC");
         $List = $oGoodsStock->findAll();
         //Res
@@ -38,6 +42,7 @@ class Stock extends BaseController
         $DeliverWeight = $this->request->getVar("DeliverWeight");
         $Price = $this->request->getVar("Price");
         $SellPrice = $this->request->getVar("SellPrice");
+        $MemberSellPrice = $this->request->getVar("MemberSellPrice");
         $Seq = $this->request->getVar("Seq");
         //檢查ID
         if ($GoodsID) {
@@ -81,6 +86,7 @@ class Stock extends BaseController
             "DeliverWeight"=>$DeliverWeight,
             "Price"=>$Price,
             "SellPrice"=>$SellPrice,
+            "MemberSellPrice"=>$MemberSellPrice,
             "Seq"=>$Seq,
         ]);
         if ($oGoodsStock->errors()) {

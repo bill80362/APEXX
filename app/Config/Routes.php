@@ -199,6 +199,27 @@ $routes->group('admin', ["filter"=>"AdminAuth"], function ($routes) {
     $routes->post('goods/picture/(:num)/(:num)/(:num)', 'Admin\Goods\Picture::create/$1/$2/$3');
     $routes->delete('goods/picture/(:num)', 'Admin\Goods\Picture::del/$1');
     $routes->patch('goods/picture/updateSeqBatch', 'Admin\Goods\Picture::updateSeqBatch');
+    //CustomGoodsSpecCategory
+    $routes->get('customgoods/category', 'Admin\CustomGoods\Category::getList');
+    $routes->put('customgoods/category', 'Admin\CustomGoods\Category::create');
+    $routes->patch('customgoods/category', 'Admin\CustomGoods\Category::update/$1');
+    $routes->delete('customgoods/category/(:num)', 'Admin\CustomGoods\Category::del/$1');
+    $routes->patch('customgoods/category/updateSeqBatch', 'Admin\CustomGoods\Category::updateSeqBatch');
+    //CustomGoodsSpec
+    $routes->get('customgoods/spec', 'Admin\CustomGoods\Spec::getList');
+    $routes->put('customgoods/spec', 'Admin\CustomGoods\Spec::create');
+    $routes->patch('customgoods/spec', 'Admin\CustomGoods\Spec::update/$1');
+    $routes->delete('customgoods/spec/(:num)', 'Admin\CustomGoods\Spec::del/$1');
+    $routes->patch('customgoods/spec/updateSeqBatch', 'Admin\CustomGoods\Spec::updateSeqBatch');
+    //CustomGoodsStock
+    $routes->get('customgoods/stock/(:num)', 'Admin\CustomGoods\Stock::getList/$1');
+    $routes->post('customgoods/stock', 'Admin\CustomGoods\Stock::create');
+    $routes->patch('customgoods/stock/updateSeqBatch', 'Admin\CustomGoods\Stock::updateSeqBatch');
+    //CustomGoodsSpecPicture
+    $routes->get('customgoods/picture/(:num)', 'Admin\CustomGoods\Picture::getList/$1');
+    $routes->post('customgoods/picture/(:num)', 'Admin\CustomGoods\Picture::create/$1');
+    $routes->delete('customgoods/picture/(:num)', 'Admin\CustomGoods\Picture::del/$1');
+    $routes->patch('customgoods/picture/updateSeqBatch', 'Admin\CustomGoods\Picture::updateSeqBatch');
     //discount
     $routes->get('discount', 'Admin\Discount\Discount::getList');
     $routes->put('discount', 'Admin\Discount\Discount::create');
