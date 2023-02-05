@@ -21,3 +21,4 @@
 # 常駐程式
 - 放在 /app/Commands，主機目前只能透過Crontab定期執行
 
+-test
