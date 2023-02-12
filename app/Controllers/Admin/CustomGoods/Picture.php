@@ -14,8 +14,9 @@ class Picture extends BaseController
     {
         //
         $oPicture = new \App\Models\CustomGoods\CustomGoodsSpecPicture();
-        $oPicture->where("CustomGoodsSpecPicture.CustomSpecID", $CustomSpecID);
-        $oPicture->orderBy("Seq", "ASC");
+        $oPicture->where("CustomSpecID", $CustomSpecID);
+        $oPicture->orderBy("Seq");
+        $oPicture->orderBy("SpecPictureID");
         $List = $oPicture->findAll();
         //Res
         return $this->respond(ResponseData::success($List));

@@ -25,19 +25,14 @@ class CustomGoodsStock extends Model
 
     protected $validationRules    = [
         "GoodsID" => "required|numeric",
-        "CustomSpecID" => "required",
         "Status" => "in_list[Y,N]",
         "DeliverVolume" => "required|numeric",
         "DeliverWeight" => "required|numeric",
-        "Seq" => "required|numeric",
     ];
     protected $validationMessages = [
         "GoodsID" => [
             "required" => "商品編號為必填",
             "numeric" => "商品編號必須是整數",
-        ],
-        "CustomSpecID" => [
-            "required" => "客製規格編號為必填",
         ],
         "Status" =>[
             "in_list"=> "開關只能是Y,N",
@@ -49,10 +44,6 @@ class CustomGoodsStock extends Model
         "DeliverWeight" => [
             "required" => "重量為必填",
             "numeric" => "重量必須是整數",
-        ],
-        "Seq" => [
-            "required" => "排序權重為必填",
-            "numeric" => "排序權重必須是整數",
         ],
     ];
     protected $skipValidation     = false;

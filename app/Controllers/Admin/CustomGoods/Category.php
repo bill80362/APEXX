@@ -9,26 +9,46 @@ use CodeIgniter\API\ResponseTrait;
 class Category extends BaseController
 {
     use ResponseTrait;
-    public function getList()
+    public function getList($GoodsID)
     {
         //
         $oCategory = new \App\Models\CustomGoods\CustomGoodsSpecCategory();
+        $oCategory->where("GoodsID", $GoodsID);
         $oCategory->orderBy("Seq");
-        $oCategory->orderBy("SpecCategoryID", "DESC");
+        $oCategory->orderBy("SpecCategoryID");
         $List = $oCategory->findAll();
+
+        $oSpec = new \App\Models\CustomGoods\CustomGoodsSpec();
+
+        //一併回傳客製規格資料
+        foreach ($List as $key=>$Data) {
+            $oSpec->resetQuery();
+            $oSpec->where("SpecCategoryID", $Data["SpecCategoryID"]);
+            $oSpec->orderBy("Seq");
+            $oSpec->orderBy("CustomSpecID");
+            $List[$key]["CustomSpecList"] = $oSpec->findAll();
+        }
         //Res
         return $this->respond(ResponseData::success($List));
     }
     public function create()
     {
         //
+        $GoodsID = $this->request->getVar("GoodsID");
         $Title = $this->request->getVar("Title");
         $Seq = $this->request->getVar("Seq");
         $Status = $this->request->getVar("Status");
         //
+        //檢查商品ID
+        $oGoods = new \App\Models\Goods\Goods();
+        $Data = $oGoods->find($GoodsID);
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("商品ID有誤"));
+        }
         $oCategory = new \App\Models\CustomGoods\CustomGoodsSpecCategory();
         $oCategory->protect(false);
         $InsertID = $oCategory->insert([
+           "GoodsID"=>$GoodsID,
            "Title"=>$Title,
            "Seq"=>$Seq,
            "Status"=>$Status,
@@ -40,6 +60,7 @@ class Category extends BaseController
         //Res
         $Data = [
             "SpecCategoryID"=>$InsertID,
+            "GoodsID"=>$GoodsID,
             "Title"=>$Title,
             "Seq"=>$Seq,
             "Status"=>$Status,
@@ -50,12 +71,19 @@ class Category extends BaseController
     {
         //
         $ID = $this->request->getVar("ID");
+        $GoodsID = $this->request->getVar("GoodsID");
         $Title = $this->request->getVar("Title");
         $Seq = $this->request->getVar("Seq");
         $Status = $this->request->getVar("Status");
         //
-        $oCategory = new \App\Models\CustomGoods\CustomGoodsSpecCategory();
+        //檢查商品ID
+        $oGoods = new \App\Models\Goods\Goods();
+        $Data = $oGoods->find($GoodsID);
+        if (!$Data) {
+            return $this->respond(ResponseData::fail("商品ID有誤"));
+        }
         //檢查ID
+        $oCategory = new \App\Models\CustomGoods\CustomGoodsSpecCategory();
         $Data = $oCategory->find($ID);
         if (!$Data) {
             return $this->respond(ResponseData::fail("找不到該筆資料"));
@@ -63,6 +91,7 @@ class Category extends BaseController
         //開始更新
         $oCategory->protect(false);
         $oCategory->update($ID, [
+            "GoodsID"=>$GoodsID,
             "Title"=>$Title,
             "Seq"=>$Seq,
             "Status"=>$Status,
@@ -74,6 +103,7 @@ class Category extends BaseController
         //Res
         $Data = [
             "SpecCategoryID"=>$ID,
+            "GoodsID"=>$GoodsID,
             "Title"=>$Title,
             "Seq"=>$Seq,
             "Status"=>$Status,

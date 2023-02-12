@@ -200,13 +200,13 @@ $routes->group('admin', ["filter"=>"AdminAuth"], function ($routes) {
     $routes->delete('goods/picture/(:num)', 'Admin\Goods\Picture::del/$1');
     $routes->patch('goods/picture/updateSeqBatch', 'Admin\Goods\Picture::updateSeqBatch');
     //CustomGoodsSpecCategory
-    $routes->get('customgoods/category', 'Admin\CustomGoods\Category::getList');
+    $routes->get('customgoods/category/(:num)', 'Admin\CustomGoods\Category::getList/$1');
     $routes->put('customgoods/category', 'Admin\CustomGoods\Category::create');
     $routes->patch('customgoods/category', 'Admin\CustomGoods\Category::update/$1');
     $routes->delete('customgoods/category/(:num)', 'Admin\CustomGoods\Category::del/$1');
     $routes->patch('customgoods/category/updateSeqBatch', 'Admin\CustomGoods\Category::updateSeqBatch');
     //CustomGoodsSpec
-    $routes->get('customgoods/spec', 'Admin\CustomGoods\Spec::getList');
+    $routes->get('customgoods/spec/(:num)', 'Admin\CustomGoods\Spec::getList/$1');
     $routes->put('customgoods/spec', 'Admin\CustomGoods\Spec::create');
     $routes->patch('customgoods/spec', 'Admin\CustomGoods\Spec::update/$1');
     $routes->delete('customgoods/spec/(:num)', 'Admin\CustomGoods\Spec::del/$1');
@@ -214,12 +214,21 @@ $routes->group('admin', ["filter"=>"AdminAuth"], function ($routes) {
     //CustomGoodsStock
     $routes->get('customgoods/stock/(:num)', 'Admin\CustomGoods\Stock::getList/$1');
     $routes->post('customgoods/stock', 'Admin\CustomGoods\Stock::create');
-    $routes->patch('customgoods/stock/updateSeqBatch', 'Admin\CustomGoods\Stock::updateSeqBatch');
     //CustomGoodsSpecPicture
     $routes->get('customgoods/picture/(:num)', 'Admin\CustomGoods\Picture::getList/$1');
     $routes->post('customgoods/picture/(:num)', 'Admin\CustomGoods\Picture::create/$1');
     $routes->delete('customgoods/picture/(:num)', 'Admin\CustomGoods\Picture::del/$1');
     $routes->patch('customgoods/picture/updateSeqBatch', 'Admin\CustomGoods\Picture::updateSeqBatch');
+    //CustomGoodsChangePrice
+    $routes->get('customgoods/changeprice/(:num)', 'Admin\CustomGoods\ChangePrice::getList/$1');
+    $routes->put('customgoods/changeprice', 'Admin\CustomGoods\ChangePrice::create');
+    $routes->patch('customgoods/changeprice', 'Admin\CustomGoods\ChangePrice::update/$1');
+    $routes->delete('customgoods/changeprice/(:num)', 'Admin\CustomGoods\ChangePrice::del/$1');
+    //CustomGoodsSpecBlacklist
+    $routes->get('customgoods/blacklist/(:num)', 'Admin\CustomGoods\Blacklist::getList/$1');
+    $routes->put('customgoods/blacklist', 'Admin\CustomGoods\Blacklist::create');
+    $routes->patch('customgoods/blacklist', 'Admin\CustomGoods\Blacklist::update/$1');
+    $routes->delete('customgoods/blacklist/(:num)', 'Admin\CustomGoods\Blacklist::del/$1');
     //discount
     $routes->get('discount', 'Admin\Discount\Discount::getList');
     $routes->put('discount', 'Admin\Discount\Discount::create');

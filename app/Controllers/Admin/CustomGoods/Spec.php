@@ -9,13 +9,26 @@ use CodeIgniter\API\ResponseTrait;
 class Spec extends BaseController
 {
     use ResponseTrait;
-    public function getList()
+    public function getList($SpecCategoryID)
     {
         //
         $oSpec = new \App\Models\CustomGoods\CustomGoodsSpec();
+        $oSpec->where("SpecCategoryID", $SpecCategoryID);
         $oSpec->orderBy("Seq");
-        $oSpec->orderBy("CustomSpecID", "DESC");
+        $oSpec->orderBy("CustomSpecID");
         $List = $oSpec->findAll();
+
+        $oPicture = new \App\Models\CustomGoods\CustomGoodsSpecPicture();
+
+        //一併回傳客製規格圖片資料
+        foreach ($List as $key=>$Data) {
+            $oPicture->resetQuery();
+            $oPicture->where("CustomSpecID", $Data["CustomSpecID"]);
+            $oPicture->orderBy("Seq");
+            $oPicture->orderBy("SpecPictureID");
+            $List[$key]["SpecPictureList"] = $oPicture->findAll();
+        }
+
         //Res
         return $this->respond(ResponseData::success($List));
     }

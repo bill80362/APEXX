@@ -84,31 +84,6 @@ class Goods extends BaseController
             $oCustomGoodsStock->orderBy("CustomGoodsStock.Seq", "ASC");
             $Temp = $oCustomGoodsStock->findAll();
             if (count($Temp) > 0) {
-                // 依據關聯的"客製規格編號"，找出"客製規格"及""客製規格分類"資料
-                $oSpec = new \App\Models\CustomGoods\CustomGoodsSpec();
-                foreach ($Temp as $key=>$Data) {
-                    $CustomSpecIDArray = explode(",", $Temp[$key]["CustomSpecID"]);
-                    if (count($CustomSpecIDArray)>0) {
-                        $oSpec->resetQuery();
-                        $oSpec->select("CustomGoodsSpec.CustomSpecID");
-                        $oSpec->select("CustomGoodsSpec.Title AS SpecTitle");
-                        $oSpec->select("CustomGoodsSpec.Status AS SpecStatus");
-                        $oSpec->select("CustomGoodsSpec.Seq AS SpecSeq");
-                        $oSpec->select("CustomGoodsSpec.SpecCategoryID");
-                        $oSpec->select("CustomGoodsSpecCategory.Title AS SpecCategoryTitle");
-                        $oSpec->select("CustomGoodsSpecCategory.Status AS SpecCategoryStatus");
-                        $oSpec->select("CustomGoodsSpecCategory.Seq AS SpecCategorySeq");
-                        $oSpec->join("CustomGoodsSpecCategory", "CustomGoodsSpecCategory.SpecCategoryID=CustomGoodsSpec.SpecCategoryID");
-                        $oSpec->whereIn("CustomSpecID", $CustomSpecIDArray);
-                        $oSpec->orderBy("CustomGoodsSpec.Seq");
-                        $oSpec->orderBy("CustomGoodsSpecCategory.Seq");
-                        $oSpec->orderBy("CustomSpecID", "DESC");
-                        $Temp[$key]["SpecArray"] = $oSpec->findAll();
-                    } else {
-                        $Temp[$key]["SpecArray"] = [];
-                    }
-                }
-
                 $CustomGoodsStockKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
             }
         }
@@ -205,31 +180,6 @@ class Goods extends BaseController
         $oCustomGoodsStock->orderBy("CustomGoodsStock.Seq", "ASC");
         $Temp = $oCustomGoodsStock->findAll();
         if (count($Temp) > 0) {
-            // 依據關聯的"客製規格編號"，找出"客製規格"及""客製規格分類"資料
-            $oSpec = new \App\Models\CustomGoods\CustomGoodsSpec();
-            foreach ($Temp as $key=>$tmpData) {
-                $CustomSpecIDArray = explode(",", $Temp[$key]["CustomSpecID"]);
-                if (count($CustomSpecIDArray)>0) {
-                    $oSpec->resetQuery();
-                    $oSpec->select("CustomGoodsSpec.CustomSpecID");
-                    $oSpec->select("CustomGoodsSpec.Title AS SpecTitle");
-                    $oSpec->select("CustomGoodsSpec.Status AS SpecStatus");
-                    $oSpec->select("CustomGoodsSpec.Seq AS SpecSeq");
-                    $oSpec->select("CustomGoodsSpec.SpecCategoryID");
-                    $oSpec->select("CustomGoodsSpecCategory.Title AS SpecCategoryTitle");
-                    $oSpec->select("CustomGoodsSpecCategory.Status AS SpecCategoryStatus");
-                    $oSpec->select("CustomGoodsSpecCategory.Seq AS SpecCategorySeq");
-                    $oSpec->join("CustomGoodsSpecCategory", "CustomGoodsSpecCategory.SpecCategoryID=CustomGoodsSpec.SpecCategoryID");
-                    $oSpec->whereIn("CustomSpecID", $CustomSpecIDArray);
-                    $oSpec->orderBy("CustomGoodsSpec.Seq");
-                    $oSpec->orderBy("CustomGoodsSpecCategory.Seq");
-                    $oSpec->orderBy("CustomSpecID", "DESC");
-                    $Temp[$key]["SpecArray"] = $oSpec->findAll();
-                } else {
-                    $Temp[$key]["SpecArray"] = [];
-                }
-            }
-
             $CustomGoodsStockKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
         }
 

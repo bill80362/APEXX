@@ -2,21 +2,23 @@
 -- 資料表結構 `CustomGoodsSpecCategory`
 --
 CREATE TABLE `CustomGoodsSpecCategory` (
-  `SpecCategoryID` int(11) NOT NULL COMMENT '客製規格類別',
+  `SpecCategoryID` int(11) NOT NULL COMMENT '客製規格分類',
+  `GoodsID` int(11) NOT NULL,
   `Title` varchar(100) NOT NULL,
   `Status` char(1) NOT NULL,
   `Seq` int(11) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客製商品規格分類表';
 
 
 ALTER TABLE `CustomGoodsSpecCategory`
-  ADD PRIMARY KEY (`SpecCategoryID`);
+  ADD PRIMARY KEY (`SpecCategoryID`),
+  ADD KEY `idx_CustomGoodsSpecCategory_GoodsID` (`GoodsID`);
 
 
 ALTER TABLE `CustomGoodsSpecCategory`
-  MODIFY `SpecCategoryID` int(11) NOT NULL AUTO_INCREMENT COMMENT '客製規格類別';
+  MODIFY `SpecCategoryID` int(11) NOT NULL AUTO_INCREMENT COMMENT '客製規格分類';
 
 --
 -- 資料表結構 `CustomGoodsSpec`
@@ -29,11 +31,12 @@ CREATE TABLE `CustomGoodsSpec` (
   `Seq` int(11) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客製商品規格表';
 
 
 ALTER TABLE `CustomGoodsSpec`
-  ADD PRIMARY KEY (`CustomSpecID`);
+  ADD PRIMARY KEY (`CustomSpecID`),
+  ADD KEY `idx_CustomGoodsSpec_SpecCategoryID` (`SpecCategoryID`);
 
 
 ALTER TABLE `CustomGoodsSpec`
@@ -49,22 +52,23 @@ CREATE TABLE `CustomGoodsSpecPicture` (
   `Seq` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客製規格圖片';
 
 
 ALTER TABLE `CustomGoodsSpecPicture`
-  ADD PRIMARY KEY (`SpecPictureID`);
+  ADD PRIMARY KEY (`SpecPictureID`),
+  ADD KEY `idx_CustomGoodsSpecPicture_CustomSpecID` (`CustomSpecID`);
 
 
 ALTER TABLE `CustomGoodsSpecPicture`
   MODIFY `SpecPictureID` int(11) NOT NULL AUTO_INCREMENT;
+
  
 --
 -- 資料表結構 `CustomGoodsStock`
 --
 CREATE TABLE `CustomGoodsStock` (
   `GoodsID` int(11) NOT NULL,
-  `CustomSpecID` text NOT NULL COMMENT '由客製規格編號(CustomSpecID)串接而成，依逗號分隔',
   `Stock` int(11) NOT NULL,
   `Status` char(1) NOT NULL,
   `DeliverVolume` int(11) NOT NULL COMMENT '體積',
@@ -72,7 +76,6 @@ CREATE TABLE `CustomGoodsStock` (
   `Price` int(11) NOT NULL COMMENT '原價',
   `SellPrice` int(11) NOT NULL COMMENT '售價',
   `MemberSellPrice` int(11) NOT NULL COMMENT '會員售價',
-  `Seq` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客製化商品庫存';
@@ -80,3 +83,47 @@ CREATE TABLE `CustomGoodsStock` (
 
 ALTER TABLE `CustomGoodsStock`
   ADD PRIMARY KEY (`GoodsID`) USING BTREE;
+  
+  
+--
+-- 資料表結構 `CustomGoodsChangePrice`
+--
+CREATE TABLE `CustomGoodsChangePrice` (
+  `ChangePriceID` int(11) NOT NULL,
+  `GoodsID` int(11) NOT NULL,
+  `CustomSpecID` text NOT NULL COMMENT '由客製規格編號(CustomSpecID)串接而成，依逗號分隔',
+  `ChangePrice` int(11) NOT NULL COMMENT '規格組合異動價',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客製化商品規格組合異動價';
+
+
+ALTER TABLE `CustomGoodsChangePrice`
+  ADD PRIMARY KEY (`ChangePriceID`),
+  ADD KEY `idx_CustomGoodsChangePrice_GoodsID` (`GoodsID`);
+
+
+ALTER TABLE `CustomGoodsChangePrice`
+  MODIFY `ChangePriceID` int(11) NOT NULL AUTO_INCREMENT;
+
+
+--
+-- 資料表結構 `CustomGoodsSpecBlacklist`
+--
+CREATE TABLE `CustomGoodsSpecBlacklist` (
+  `BlacklistID` int(11) NOT NULL,
+  `GoodsID` int(11) NOT NULL,
+  `CustomSpecID` text NOT NULL COMMENT '由客製規格編號(CustomSpecID)串接而成，依逗號分隔',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客製化商品規格黑名單';
+
+
+ALTER TABLE `CustomGoodsSpecBlacklist`
+  ADD PRIMARY KEY (`BlacklistID`) USING BTREE,
+  ADD KEY `idx_CustomGoodsChangePrice_GoodsID` (`GoodsID`);
+
+
+ALTER TABLE `CustomGoodsSpecBlacklist`
+  MODIFY `BlacklistID` int(11) NOT NULL AUTO_INCREMENT;
+  
