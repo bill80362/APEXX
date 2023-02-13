@@ -81,7 +81,6 @@ class Goods extends BaseController
             $GoodsIDArray = array_column($List, "GoodsID");
             $oCustomGoodsStock  = new \App\Models\CustomGoods\CustomGoodsStock();
             $oCustomGoodsStock->whereIn("CustomGoodsStock.GoodsID", $GoodsIDArray);
-            $oCustomGoodsStock->orderBy("CustomGoodsStock.Seq", "ASC");
             $Temp = $oCustomGoodsStock->findAll();
             if (count($Temp) > 0) {
                 $CustomGoodsStockKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
@@ -177,7 +176,6 @@ class Goods extends BaseController
         $GoodsIDArray       = [$Data["GoodsID"]];
         $oCustomGoodsStock  = new \App\Models\CustomGoods\CustomGoodsStock();
         $oCustomGoodsStock->whereIn("CustomGoodsStock.GoodsID", $GoodsIDArray);
-        $oCustomGoodsStock->orderBy("CustomGoodsStock.Seq", "ASC");
         $Temp = $oCustomGoodsStock->findAll();
         if (count($Temp) > 0) {
             $CustomGoodsStockKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
