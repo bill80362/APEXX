@@ -9,24 +9,36 @@ use CodeIgniter\API\ResponseTrait;
 class Spec extends BaseController
 {
     use ResponseTrait;
-    public function getList($SpecCategoryID)
+    public function getList($SpecCategoryID = -1)
     {
         //
         $oSpec = new \App\Models\CustomGoods\CustomGoodsSpec();
-        $oSpec->where("SpecCategoryID", $SpecCategoryID);
+        if (isset($SpecCategoryID) && $SpecCategoryID != -1) {
+            $oSpec->where("SpecCategoryID", $SpecCategoryID);
+        } else {
+            $oSpec->orderBy("SpecCategoryID");
+        }
         $oSpec->orderBy("Seq");
         $oSpec->orderBy("CustomSpecID");
         $List = $oSpec->findAll();
 
-        $oPicture = new \App\Models\CustomGoods\CustomGoodsSpecPicture();
-
-        //一併回傳客製規格圖片資料
-        foreach ($List as $key=>$Data) {
-            $oPicture->resetQuery();
-            $oPicture->where("CustomSpecID", $Data["CustomSpecID"]);
+        //關聯客製規格圖片
+        $SpecPictureKeyValue = [];
+        if (count($List)) {
+            $CustomSpecIDArray = array_column($List, "CustomSpecID");
+            $oPicture = new \App\Models\CustomGoods\CustomGoodsSpecPicture();
+            $oPicture->whereIn("CustomSpecID", $CustomSpecIDArray);
             $oPicture->orderBy("Seq");
             $oPicture->orderBy("SpecPictureID");
-            $List[$key]["SpecPictureList"] = $oPicture->findAll();
+            $Temp = $oPicture->findAll();
+            if (count($Temp) > 0) {
+                $SpecPictureKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "CustomSpecID");
+            }
+        }
+
+        //放入資料
+        foreach ($List as $key => $Data) {
+            $List[$key]["SpecPictureList"] = $SpecPictureKeyValue[$List[$key]["CustomSpecID"]] ?? [];
         }
 
         //Res

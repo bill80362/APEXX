@@ -201,12 +201,14 @@ $routes->group('admin', ["filter"=>"AdminAuth"], function ($routes) {
     $routes->patch('goods/picture/updateSeqBatch', 'Admin\Goods\Picture::updateSeqBatch');
     //CustomGoodsSpecCategory
     $routes->get('customgoods/category/(:num)', 'Admin\CustomGoods\Category::getList/$1');
+    $routes->get('customgoods/category', 'Admin\CustomGoods\Category::getList');
     $routes->put('customgoods/category', 'Admin\CustomGoods\Category::create');
     $routes->patch('customgoods/category', 'Admin\CustomGoods\Category::update/$1');
     $routes->delete('customgoods/category/(:num)', 'Admin\CustomGoods\Category::del/$1');
     $routes->patch('customgoods/category/updateSeqBatch', 'Admin\CustomGoods\Category::updateSeqBatch');
     //CustomGoodsSpec
     $routes->get('customgoods/spec/(:num)', 'Admin\CustomGoods\Spec::getList/$1');
+    $routes->get('customgoods/spec', 'Admin\CustomGoods\Spec::getList');
     $routes->put('customgoods/spec', 'Admin\CustomGoods\Spec::create');
     $routes->patch('customgoods/spec', 'Admin\CustomGoods\Spec::update/$1');
     $routes->delete('customgoods/spec/(:num)', 'Admin\CustomGoods\Spec::del/$1');

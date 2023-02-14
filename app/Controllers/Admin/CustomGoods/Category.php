@@ -9,25 +9,38 @@ use CodeIgniter\API\ResponseTrait;
 class Category extends BaseController
 {
     use ResponseTrait;
-    public function getList($GoodsID)
+    public function getList($GoodsID = -1)
     {
         //
         $oCategory = new \App\Models\CustomGoods\CustomGoodsSpecCategory();
-        $oCategory->where("GoodsID", $GoodsID);
+        if (isset($GoodsID) && $GoodsID != -1) {
+            $oCategory->where("GoodsID", $GoodsID);
+        } else {
+            $oCategory->orderBy("GoodsID");
+        }
         $oCategory->orderBy("Seq");
         $oCategory->orderBy("SpecCategoryID");
         $List = $oCategory->findAll();
 
-        $oSpec = new \App\Models\CustomGoods\CustomGoodsSpec();
-
-        //一併回傳客製規格資料
-        foreach ($List as $key=>$Data) {
-            $oSpec->resetQuery();
-            $oSpec->where("SpecCategoryID", $Data["SpecCategoryID"]);
+        //關聯客製規格資料
+        $SpecCategoryKeyValue = [];
+        if (count($List)) {
+            $SpecCategoryIDArray = array_column($List, "SpecCategoryID");
+            $oSpec = new \App\Models\CustomGoods\CustomGoodsSpec();
+            $oSpec->whereIn("SpecCategoryID", $SpecCategoryIDArray);
             $oSpec->orderBy("Seq");
             $oSpec->orderBy("CustomSpecID");
-            $List[$key]["CustomSpecList"] = $oSpec->findAll();
+            $Temp = $oSpec->findAll();
+            if (count($Temp) > 0) {
+                $SpecCategoryKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "SpecCategoryID");
+            }
         }
+
+        //放入資料
+        foreach ($List as $key => $Data) {
+            $List[$key]["CustomSpecList"] = $SpecCategoryKeyValue[$List[$key]["SpecCategoryID"]] ?? [];
+        }
+
         //Res
         return $this->respond(ResponseData::success($List));
     }
