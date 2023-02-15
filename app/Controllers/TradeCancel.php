@@ -10,7 +10,7 @@ class TradeCancel extends BaseController
     public function cancelAndStockBack($TradeID)
     {
         //首頁網址
-        $redirectURL = "https://www.kolshop.com.tw/";
+        $redirectURL = $_ENV["app.frontURL"];
         //訂單取消
         $oTrade = new \App\Models\Trade\Trade();
         $oTrade->where("Status", "W");//只有Ｗ狀態能夠取消
