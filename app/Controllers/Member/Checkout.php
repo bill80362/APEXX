@@ -58,6 +58,7 @@ class Checkout extends BaseController
             "DiscountFullTotal"=>$oLibCheckout->DiscountFullTotal,
             "AfterCouponTotal"=>$oLibCheckout->AfterCouponTotal,
             "ShippingFree"=>$oLibCheckout->ShippingFree,
+            "DiscountID_D"=>$oLibCheckout->DiscountID_ShippingFree,
             "GiveInfo"=>$oLibCheckout->GiveInfo,
             "CouponInfo"=>$oLibCheckout->CouponInfo,
             //金流

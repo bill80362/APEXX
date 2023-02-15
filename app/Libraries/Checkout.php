@@ -284,7 +284,7 @@ class Checkout
             //免運優惠、統計金額有過門檻 使用現金折抵後的金額
             if ($DiscountData["DiscountType"] == "D" &&  $this->AfterCouponTotal >= $DiscountData["Threshold"]) {
                 $this->ShippingFree = true;
-                $this->DiscountID_ShippingFee = $DiscountData["DiscountID"];
+                $this->DiscountID_ShippingFree = $DiscountData["DiscountID"];
             }
         }
         /**是否有贈品**/
