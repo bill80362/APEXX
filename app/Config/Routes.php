@@ -49,7 +49,7 @@ $routes->post('/editor/upload', 'Editor::editor');
 $routes->options('/editor/upload', 'Editor::getOptions');
 $routes->options('/', 'Editor::getOptions');
 /**交易取消訂單**/
-$routes->get('/order_cancel/(:num)', 'TradeCancel::cancelAndStockBack');
+$routes->get('/order_cancel/(:num)', 'TradeCancel::cancelAndStockBack/$1');
 
 
 /**前端-不用權限***/
