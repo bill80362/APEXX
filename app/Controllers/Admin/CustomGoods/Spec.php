@@ -128,12 +128,50 @@ class Spec extends BaseController
         if (!$Data) {
             return $this->respond(ResponseData::fail("找不到該筆資料"));
         }
+        //檢查ID是否已使用在訂單資料(SubTrade)中
+        $db = \Config\Database::connect();
+        $sql = "SELECT SubTradeID FROM `SubTrade` WHERE CONCAT(',',`CustomSpecID`,',') LIKE '%," . $ID . ",%'";
+        $query = $db->query($sql);
+        $SubTradeList = $query->getResultArray();
+        if (count($SubTradeList)) {
+            return $this->respond(ResponseData::fail("此規格資料已用於訂單之中，無法刪除!"));
+        }
         //開始刪除
         $oSpec->protect(false);
         $oSpec->delete($ID);
         if ($oSpec->errors()) {
             $ErrorMsg = implode(",", $oSpec->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
+        }
+        //開始刪除關聯資料
+        //刪除相關的"客製化商品規格組合異動價"資料
+        $sql = "DELETE FROM `CustomGoodsChangePrice` WHERE CONCAT(',',`CustomSpecID`,',') LIKE '%," . $ID . ",%'";
+        $db->simpleQuery($sql);
+        //刪除相關的"客製化商品規格黑名單"資料
+        $sql = "DELETE FROM `CustomGoodsSpecBlacklist` WHERE CONCAT(',',`CustomSpecID`,',') LIKE '%," . $ID . ",%'";
+        $db->simpleQuery($sql);
+
+        $oPicture = new \App\Models\CustomGoods\CustomGoodsSpecPicture();
+        $oPicture->where("CustomSpecID", $ID);
+        $PictureList = $oPicture->findAll();
+        if (count($PictureList)) {
+            //刪除客製規格下的圖檔 & 紀錄
+            foreach ($PictureList as $Data) {
+                if (isset($Data["Image"]) && $Data["Image"] != "") {
+                    $FileHostPath = ROOTPATH . "public" . $Data["Image"];
+                    if (file_exists($FileHostPath)) {
+                        unlink($FileHostPath);
+                    }
+                }
+            }
+            $SpecPictureIDArray = array_column($PictureList, "SpecPictureID");
+            $oPicture->resetQuery();
+            $oPicture->protect(false);
+            $oPicture->delete($SpecPictureIDArray);
+            if ($oPicture->errors()) {
+                $ErrorMsg = implode(",", $oPicture->errors());
+                return $this->respond(ResponseData::fail($ErrorMsg));
+            }
         }
         //Res
         return $this->respond(ResponseData::success([]));

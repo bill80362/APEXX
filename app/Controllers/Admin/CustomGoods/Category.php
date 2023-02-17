@@ -132,14 +132,70 @@ class Category extends BaseController
         if (!$Data) {
             return $this->respond(ResponseData::fail("找不到該筆資料"));
         }
-        //檢查資料是否已被關聯
-
+        //檢查CustomSpecID是否已使用在訂單資料(SubTrade)中
+        $db = \Config\Database::connect();
+        $oSpec = new \App\Models\CustomGoods\CustomGoodsSpec();
+        $oSpec->where("SpecCategoryID", $ID);
+        $SpecList = $oSpec->findAll();
+        $CustomSpecIDArray = array_column($SpecList, "CustomSpecID");
+        foreach ($CustomSpecIDArray as $CustomSpecID) {
+            $sql = "SELECT SubTradeID FROM `SubTrade` WHERE CONCAT(',',`CustomSpecID`,',') LIKE '%," . $CustomSpecID . ",%'";
+            $query = $db->query($sql);
+            $SubTradeList = $query->getResultArray();
+            if (count($SubTradeList)) {
+                return $this->respond(ResponseData::fail("此規格分類下的規格資料已用於訂單之中，無法刪除!"));
+            }
+            $query->freeResult();
+        }
         //開始刪除
         $oCategory->protect(false);
         $oCategory->delete($ID);
         if ($oCategory->errors()) {
             $ErrorMsg = implode(",", $oCategory->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
+        }
+        //開始刪除關聯資料
+        if (count($SpecList)) {
+            //刪除此分類下的規格
+            $oSpec->resetQuery();
+            $oSpec->protect(false);
+            $oSpec->delete($CustomSpecIDArray);
+            if ($oSpec->errors()) {
+                $ErrorMsg = implode(",", $oSpec->errors());
+                return $this->respond(ResponseData::fail($ErrorMsg));
+            }
+
+            foreach ($CustomSpecIDArray as $CustomSpecID) {
+                //刪除相關的"客製化商品規格組合異動價"資料
+                $sql = "DELETE FROM `CustomGoodsChangePrice` WHERE CONCAT(',',`CustomSpecID`,',') LIKE '%," . $CustomSpecID . ",%'";
+                $db->simpleQuery($sql);
+                //刪除相關的"客製化商品規格黑名單"資料
+                $sql = "DELETE FROM `CustomGoodsSpecBlacklist` WHERE CONCAT(',',`CustomSpecID`,',') LIKE '%," . $CustomSpecID . ",%'";
+                $db->simpleQuery($sql);
+            }
+
+            $oPicture = new \App\Models\CustomGoods\CustomGoodsSpecPicture();
+            $oPicture->whereIn("CustomSpecID", $CustomSpecIDArray);
+            $PictureList = $oPicture->findAll();
+            if (count($PictureList)) {
+                //刪除客製規格下的圖檔 & 紀錄
+                foreach ($PictureList as $Data) {
+                    if (isset($Data["Image"]) && $Data["Image"] != "") {
+                        $FileHostPath = ROOTPATH . "public" . $Data["Image"];
+                        if (file_exists($FileHostPath)) {
+                            unlink($FileHostPath);
+                        }
+                    }
+                }
+                $SpecPictureIDArray = array_column($PictureList, "SpecPictureID");
+                $oPicture->resetQuery();
+                $oPicture->protect(false);
+                $oPicture->delete($SpecPictureIDArray);
+                if ($oPicture->errors()) {
+                    $ErrorMsg = implode(",", $oPicture->errors());
+                    return $this->respond(ResponseData::fail($ErrorMsg));
+                }
+            }
         }
         //Res
         return $this->respond(ResponseData::success([]));
