@@ -21,7 +21,7 @@ class Blacklist extends BaseController
             // 依據關聯的"客製規格編號"，找出"客製規格和分類列表"資料
             $CustomSpecIDArray = explode(",", $List[$key]["CustomSpecID"]);
             if (count($CustomSpecIDArray)>0) {
-                $List[$key]["CustomSpecList"] = \App\Controllers\Admin\CustomGoods\Common::findCustomSpecList($List[$key]["GoodsID"], [], $CustomSpecIDArray);
+                $List[$key]["CustomSpecList"] = \App\Libraries\CustomGoods::findCustomSpecList($List[$key]["GoodsID"], [], $CustomSpecIDArray);
             } else {
                 $List[$key]["CustomSpecList"] = [];
             }

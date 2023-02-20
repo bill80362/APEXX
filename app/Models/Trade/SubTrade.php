@@ -61,14 +61,20 @@ class SubTrade extends Model
         $this->where("Status", "Y");//只抓沒退貨的
         $List = $this->findAll();
         $oGoodsStock = new \App\Models\Goods\GoodsStock();
+        $oCustomGoodsStock = new \App\Models\CustomGoods\CustomGoodsStock();
         foreach ($List as $Data) {
             $this->resetQuery();
             $this->update($Data["SubTradeID"], [
                 "Status"=>"F",//狀態改成已退貨
             ]);
             //返回庫存
-            $oGoodsStock->resetQuery();
-            $oGoodsStock->ioStock($Data["GoodsID"], $Data["ColorID"], $Data["SizeID"], "1");
+            if (isset($Data["CustomSpecID"]) && $Data["CustomSpecID"] != "") {
+                $oCustomGoodsStock->resetQuery();
+                $oCustomGoodsStock->ioStock($Data["GoodsID"], "1");
+            } else {
+                $oGoodsStock->resetQuery();
+                $oGoodsStock->ioStock($Data["GoodsID"], $Data["ColorID"], $Data["SizeID"], "1");
+            }
         }
         $this->protect(true);
         return true;

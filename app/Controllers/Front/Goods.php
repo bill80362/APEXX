@@ -112,8 +112,9 @@ class Goods extends BaseController
     {
         //商品ID
         $oGoods = new \App\Models\Goods\Goods();
-        $oGoods->select("Goods.*,SUM(GoodsStock.Stock) AS StockSum");
+        $oGoods->select("Goods.*,SUM(GoodsStock.Stock) AS StockSum,SUM(CustomGoodsStock.Stock) AS CustomGoodsStockSum");
         $oGoods->join("GoodsStock", "GoodsStock.GoodsID=Goods.GoodsID", "left");
+        $oGoods->join("CustomGoodsStock", "CustomGoodsStock.GoodsID=Goods.GoodsID", "left");
         $oGoods->groupBy("Goods.GoodsID");
         $Data = $oGoods->find($GoodsID);
         if (!$Data) {

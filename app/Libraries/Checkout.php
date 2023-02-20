@@ -38,30 +38,82 @@ class Checkout
 
     public function cashier(array $GoodsStockArray, $CouponCode, $PaymentID, $ShippingID)
     {
-        //購物車計算
-        $oGoodsStock = new \App\Models\Goods\GoodsStock();
-        $oGoodsStock->select("GoodsStock.*,Goods.*");
-        $oGoodsStock->select("GoodsStock.Status AS GoodsStockStatus");
-        $oGoodsStock->select("Goods.Status AS GoodsStatus");
-        $oGoodsStock->select("Goods.GoodsTimeStart");
-        $oGoodsStock->select("Goods.GoodsTimeEnd");
-        $oGoodsStock->select("Color.ColorTitle");
-        $oGoodsStock->select("Size.SizeTitle");
-        $oGoodsStock->join("Goods", "GoodsStock.GoodsID = Goods.GoodsID");
-        $oGoodsStock->join("Color", "Color.ColorID=GoodsStock.ColorID");
-        $oGoodsStock->join("Size", "Size.SizeID=GoodsStock.SizeID");
-        //商品
-        $oGoodsStock->groupStart();
-        foreach ($GoodsStockArray as $Data) {
-            $oGoodsStock->orGroupStart();
-            $oGoodsStock->where("GoodsStock.GoodsID", $Data["GoodsID"]);
-            $oGoodsStock->where("GoodsStock.ColorID", $Data["ColorID"]);
-            $oGoodsStock->where("GoodsStock.SizeID", $Data["SizeID"]);
-            $oGoodsStock->groupEnd();
+        //資料一致化，將有缺的部分補上-1
+        foreach ($GoodsStockArray as $key => $Data) {
+            $GoodsStockArray[$key]["ColorID"] = $Data["ColorID"]??-1;
+            $GoodsStockArray[$key]["SizeID"] = $Data["SizeID"]??-1;
+            $GoodsStockArray[$key]["CustomSpecID"] = $Data["CustomSpecID"]??-1;
         }
-        $oGoodsStock->groupEnd();
+        //購物車計算
+        $db = \Config\Database::connect();
+        // 一般商品的庫存
+        $sql = "SELECT `GoodsStock`.`GoodsID`, 
+                       `GoodsStock`.`ColorID`, 
+                       `GoodsStock`.`SizeID`, 
+                       `GoodsStock`.`Stock`, 
+                       `GoodsStock`.`DeliverVolume`,
+                       `GoodsStock`.`DeliverWeight`,
+                       `GoodsStock`.`Price`, 
+                       `GoodsStock`.`SellPrice`,
+                       `GoodsStock`.`MemberSellPrice`,
+                       `GoodsStock`.`Status` AS `GoodsStockStatus`,
+                       `Goods`.*,
+                       `Goods`.`Status` AS `GoodsStatus`,
+                       `Color`.`ColorTitle`,
+                       `Size`.`SizeTitle`,
+                       '' AS `SpecCategoryID`,
+                       '' AS `BlacklistSpecID`,
+                       '' AS `ChangePriceSpec` 
+                FROM `GoodsStock`
+                JOIN `Goods` ON `GoodsStock`.`GoodsID` = `Goods`.`GoodsID` AND (IFNULL(`Goods`.`IsCustom`,'') = '' OR `Goods`.`IsCustom` = 'N')
+                JOIN `Color` ON `Color`.`ColorID` = `GoodsStock`.`ColorID`
+                JOIN `Size` ON `Size`.`SizeID` = `GoodsStock`.`SizeID`";
+        $sql .= " WHERE ";
+        foreach ($GoodsStockArray as $Data) {
+            $sql .= "(";
+            $sql .= "`GoodsStock`.`GoodsID` = ".$db->escape($Data["GoodsID"])." AND ";
+            $sql .= "`GoodsStock`.`ColorID` = ".$db->escape($Data["ColorID"])." AND ";
+            $sql .= "`GoodsStock`.`SizeID` = ".$db->escape($Data["SizeID"]);
+            $sql .= ")";
+            $sql .= " OR ";
+        }
+        $sql = substr($sql, 0, strlen($sql) - 3);
+        $sql .= " UNION ";
+        // 取得客製化商品的庫存
+        $sql .= "SELECT `CustomGoodsStock`.`GoodsID`, 
+                        -1 AS `ColorID`,  
+                        -1 AS `SizeID`, 
+                        `CustomGoodsStock`.`Stock`,
+                        `CustomGoodsStock`.`DeliverVolume`,
+                        `CustomGoodsStock`.`DeliverWeight`,
+                        `CustomGoodsStock`.`Price`,
+                        `CustomGoodsStock`.`SellPrice`,
+                        `CustomGoodsStock`.`MemberSellPrice`,
+                        `CustomGoodsStock`.`Status` AS `GoodsStockStatus`,
+                        `Goods`.*,
+                        `Goods`.`Status` AS `GoodsStatus`,
+                        '' AS `ColorTitle`,
+                        '' AS `SizeTitle`,
+                        /* 規格分類 */
+                        IFNULL((SELECT GROUP_CONCAT(CustomGoodsSpecCategory.SpecCategoryID) FROM CustomGoodsSpecCategory WHERE CustomGoodsSpecCategory.GoodsID = Goods.GoodsID ORDER BY CustomGoodsSpecCategory.SpecCategoryID), '') AS `SpecCategoryID`,
+                        /* 規格黑名單(無法購買組合) */
+                        IFNULL((SELECT GROUP_CONCAT(CustomGoodsSpecBlacklist.CustomSpecID SEPARATOR '|') FROM CustomGoodsSpecBlacklist WHERE CustomGoodsSpecBlacklist.GoodsID = Goods.GoodsID ORDER BY CustomGoodsSpecBlacklist.BlacklistID), '') AS `BlacklistSpecID`,
+                        /* 組合異動價 */
+                        IFNULL((SELECT GROUP_CONCAT(CONCAT_WS('&', CustomGoodsChangePrice.CustomSpecID, CONVERT(CustomGoodsChangePrice.ChangePrice, CHAR)) SEPARATOR '|') FROM CustomGoodsChangePrice WHERE CustomGoodsChangePrice.GoodsID = Goods.GoodsID ORDER BY CustomGoodsChangePrice.ChangePriceID), '') AS `ChangePriceSpec` 
+                FROM `CustomGoodsStock`
+                JOIN `Goods` ON `CustomGoodsStock`.`GoodsID` = `Goods`.`GoodsID` AND `Goods`.`IsCustom` = 'Y'";
+        $sql .= " WHERE ";
+        foreach ($GoodsStockArray as $Data) {
+            $sql .= "(";
+            $sql .= "`CustomGoodsStock`.`GoodsID` = ".$db->escape($Data["GoodsID"]);
+            $sql .= ")";
+            $sql .= " OR ";
+        }
+        $sql = substr($sql, 0, strlen($sql) - 3);
         //根據商品資訊，到ＤＢ抓資料，如果購買２個以上的商品，會只有一筆
-        $List = $oGoodsStock->findAll();
+        $query = $db->query($sql);
+        $List = $query->getResultArray();
+
         //統計每項商品的購買數量
         $moreThanTwo = [];
         foreach ($GoodsStockArray as $key => $Data) {
@@ -82,7 +134,11 @@ class Checkout
                 $count = $moreThanTwo[$Data["GoodsID"]][$Data["ColorID"]][$Data["SizeID"]];
                 //檢查 重複的數量 <= 庫存
                 if ($count > $Data["Stock"]) {
-                    $this->ErrorMessage = $Data["Title"] ."_". $Data["ColorTitle"] ."_". $Data["SizeTitle"]  . " 庫存數量不足:".$Data["Stock"];
+                    if (isset($Data["IsCustom"]) && $Data["IsCustom"] == "Y") {
+                        $this->ErrorMessage = $Data["Title"] . " 庫存數量不足:".$Data["Stock"];
+                    } else {
+                        $this->ErrorMessage = $Data["Title"] ."_". $Data["ColorTitle"] ."_". $Data["SizeTitle"]  . " 庫存數量不足:".$Data["Stock"];
+                    }
                     return false;
                 }
                 //購買２個以上的商品，逐次放入$moreThanTwoList
@@ -95,26 +151,52 @@ class Checkout
         if (count($GoodsStockArray)!=count($List)) {
             foreach ($GoodsStockArray as $Data) {
                 //購買商品資訊有誤 查看什麼商品
-                $oGoodsStock = new \App\Models\Goods\GoodsStock();
-                $oGoodsStock->select("GoodsStock.*,Goods.*");
-                $oGoodsStock->select("GoodsStock.Status AS GoodsStockStatus");
-                $oGoodsStock->select("Goods.Status AS GoodsStatus");
-                $oGoodsStock->select("Color.ColorTitle");
-                $oGoodsStock->select("Size.SizeTitle");
-                $oGoodsStock->join("Goods", "GoodsStock.GoodsID = Goods.GoodsID");
-                $oGoodsStock->join("Color", "Color.ColorID=GoodsStock.ColorID");
-                $oGoodsStock->join("Size", "Size.SizeID=GoodsStock.SizeID");
-                $oGoodsStock->where("GoodsStock.GoodsID", $Data["GoodsID"]);
-                $oGoodsStock->where("GoodsStock.ColorID", $Data["ColorID"]);
-                $oGoodsStock->where("GoodsStock.SizeID", $Data["SizeID"]);
-                $Temp = $oGoodsStock->first();
-                //
+                $sql = "SELECT `GoodsStock`.`GoodsID` 
+                        FROM `GoodsStock`
+                        JOIN `Goods` ON `GoodsStock`.`GoodsID` = `Goods`.`GoodsID` AND (IFNULL(`Goods`.`IsCustom`,'') = '' OR `Goods`.`IsCustom` = 'N')
+                        JOIN `Color` ON `Color`.`ColorID`=`GoodsStock`.`ColorID`
+                        JOIN `Size` ON `Size`.`SizeID`=`GoodsStock`.`SizeID`";
+                $sql .= " WHERE ";
+                $sql .= "`GoodsStock`.`GoodsID` = ".$db->escape($Data["GoodsID"])." AND ";
+                $sql .= "`GoodsStock`.`ColorID` = ".$db->escape($Data["ColorID"])." AND ";
+                $sql .= "`GoodsStock`.`SizeID` = ".$db->escape($Data["SizeID"]);
+                $sql .= " UNION ";
+                $sql .= "SELECT `CustomGoodsStock`.`GoodsID` 
+                         FROM `CustomGoodsStock`
+                         JOIN `Goods` ON `CustomGoodsStock`.`GoodsID` = `Goods`.`GoodsID` AND `Goods`.`IsCustom` = 'Y'";
+                $sql .= " WHERE ";
+                $sql .= "`CustomGoodsStock`.`GoodsID` = ".$db->escape($Data["GoodsID"]);
+                $query = $db->query($sql);
+                $Temp = $query->getResultArray();
+
                 if (!$Temp) {
-                    $this->ErrorMessage = "購買商品資訊有誤(".$Data["GoodsID"].",".$Data["ColorID"].",".$Data["SizeID"].")";
+                    if (isset($Data["CustomSpecID"]) && $Data["CustomSpecID"] != -1) {
+                        $this->ErrorMessage = "購買客製化商品資訊有誤(".$Data["GoodsID"].")";
+                    } else {
+                        $this->ErrorMessage = "購買一般商品資訊有誤(".$Data["GoodsID"].",".$Data["ColorID"].",".$Data["SizeID"].")";
+                    }
                     return false;
                 }
             }
         }
+        foreach ($List as $key => $Data) {
+            //將庫存資料集合中補上客製規格資訊，預設空白
+            $List[$key]["CustomSpecID"] = "";
+            //如果是會員，以[會員售價]做後續計算
+            if ($this->MemberID) {
+                $List[$key]["SellPrice"] = $Data["MemberSellPrice"]??$$Data["SellPrice"];
+            }
+        }
+        foreach ($GoodsStockArray as $Data) {
+            //補上消費者購買的規格資訊
+            foreach ($List as $key2 => $Data2) {
+                if ($Data["GoodsID"] == $Data2["GoodsID"] && $List[$key2]["CustomSpecID"] == "") {
+                    $List[$key2]["CustomSpecID"] = $Data["CustomSpecID"];
+                    break;
+                }
+            }
+        }
+
         //初始化
         $this->Total = 0;
         $this->TotalDeliverWeight = 0;
@@ -138,6 +220,82 @@ class Checkout
                 if (!(strtotime($Data["GoodsTimeStart"])< time() && time() > strtotime($Data["GoodsTimeEnd"]))) {
                     $this->ErrorMessage = $Data["Title"] . " 商品超出銷售時間限制";
                     return false;
+                }
+            }
+            /*
+            ======範例=====
+            。商品A
+            -規格分類：尺寸。規格有：大、中、小
+            -規格分類：顏色。規格有：白、黑
+            -規格分類：型號。規格有：Ａ、Ｂ、Ｃ
+
+            。結帳每種規格分類至少要選擇一個
+
+            。設定額外處理限制購買：
+            商品Ａ＋ 大、白 => 則只要規格同時選中大、白，不管型號是什麼都不能購買
+            商品Ａ＋ 大、白、Ａ => 則只要規格同時選中大、白、Ａ，不能購買
+
+            。設定額外處理價格調整：
+            商品Ａ＋大(只能單選) +100元 => ＥＸ：大、白、Ａ 就會+100
+            */
+            //客製化商品處理限制購買 & 規格組合增減售價
+            if (isset($Data["IsCustom"]) && $Data["IsCustom"] == "Y") {
+                $IsPurchaseArray = [];
+                $PurchaseSpecCategoryIDArray = [];
+                $CustomSpecIDArray = explode(",", $Data["CustomSpecID"]);
+                //消費者目前有購買的規格分類
+                if (count($CustomSpecIDArray)>0) {
+                    $PurchaseSpecCategoryIDArray = \App\Libraries\CustomGoods::findCustomSpecList($Data["GoodsID"], [], $CustomSpecIDArray);
+                }
+                //商品本身對應到的規格分類
+                if (isset($Data["SpecCategoryID"]) && $Data["SpecCategoryID"] != "") {
+                    $SpecCategoryIDArray = explode(",", $Data["SpecCategoryID"]);
+                    //將兩邊的規格分類進行比對
+                    foreach ($SpecCategoryIDArray as $key2 => $SpecCategoryID) {
+                        $IsPurchaseArray[$key2] = "N";
+                        foreach ($PurchaseSpecCategoryIDArray as $PurchaseData) {
+                            if ($PurchaseData["SpecCategoryID"] == $SpecCategoryID && $IsPurchaseArray[$key2] == "N") {
+                                $IsPurchaseArray[$key2] = "Y";
+                                break;
+                            }
+                        }
+                    }
+                }
+                //是否每個規格分類都有購買
+                foreach ($IsPurchaseArray as $IsPurchase) {
+                    if ($IsPurchase == "N") {
+                        $this->ErrorMessage = $Data["Title"] . " 客製商品的每個規格分類皆需要購買";
+                        return false;
+                    }
+                }
+                //不可販售的規格組合
+                if (isset($Data["BlacklistSpecID"]) && $Data["BlacklistSpecID"] != "") {
+                    $BlacklistSpecIDArray = explode("|", $List[$key]["BlacklistSpecID"]);
+                    foreach ($BlacklistSpecIDArray as $BlacklistSpecID) {
+                        if ($BlacklistSpecID == "") {
+                            continue;
+                        }
+                        //資料比對
+                        if (\App\Libraries\Checkout::compareSeparatorString($Data["CustomSpecID"], $BlacklistSpecID) == true) {
+                            $this->ErrorMessage = $Data["Title"] . " 客製商品出現不可販售的規格組合";
+                            return false;
+                        }
+                    }
+                }
+                //根據規格組合增減售價
+                if (isset($Data["ChangePriceSpec"]) && $Data["ChangePriceSpec"] != "") {
+                    $ChangePriceSpecArray = explode("|", $List[$key]["ChangePriceSpec"]);
+                    foreach ($ChangePriceSpecArray as $ChangePriceSpec) {
+                        if ($ChangePriceSpec == "") {
+                            continue;
+                        }
+                        $CustomSpecID = explode("&", $ChangePriceSpec)[0]??"";
+                        $ChangePrice = explode("&", $ChangePriceSpec)[1]??0;
+                        //資料比對
+                        if (\App\Libraries\Checkout::compareSeparatorString($Data["CustomSpecID"], $CustomSpecID) == true) {
+                            $List[$key]["SellPrice"] = $Data["SellPrice"] + $ChangePrice;
+                        }
+                    }
                 }
             }
             //各項商品的優惠折扣 預設100%
@@ -257,7 +415,7 @@ class Checkout
             //優惠有指定商品分類，統計該分類金額
             foreach ($List as $ShopCartData) {
 //                if (in_array($ShopCartData["GoodsID"], $Data["GoodsIDArray"], true)) {
-                    $DiscountList[$key]["CheckoutPrice"] = $this->DiscountMenuTotal;
+                $DiscountList[$key]["CheckoutPrice"] = $this->DiscountMenuTotal;
 //                }
             }
         }
@@ -315,7 +473,7 @@ class Checkout
         $CouponMoney = $this->CouponInfo["Money"]??0;
         $this->AfterCouponTotal = $this->DiscountFullTotal - $CouponMoney;
         /**全館免運**/
-        if(!$this->ShippingFree){
+        if (!$this->ShippingFree) {
             //已經免運，就不用再計算
             foreach ($DiscountList as $DiscountData) {
                 //免運優惠、統計金額有過門檻 使用現金折抵後的金額
@@ -426,5 +584,39 @@ class Checkout
         //
         $this->CheckoutList = $List;
         return $List;
+    }
+
+    //針對Str1所包含的資料，一一檢查是否同時出現在Str2之中
+    protected function compareSeparatorString(string $Str1, string $Str2, string $Separator = ",")
+    {
+        $Str1 = trim($Str1);
+        $Str2 = trim($Str2);
+        if ($Str1 == "" && $Str2 == "") {
+            return true;
+        }
+        if (($Str1 == "" && $Str2 != "") || ($Str1 != "" && $Str2 == "")) {
+            return false;
+        }
+        //將逗號分隔字串轉換成陣列後比對兩者是否相同
+        $ResultArray = [];
+        $Array1 = explode($Separator, $Str1);
+        $Array2 = explode($Separator, $Str2);
+        foreach ($Array2 as $key2 => $Data2) {
+            $ResultArray[$key2] = "N";
+            foreach ($Array1 as $Data1) {
+                if ($Data1 == $Data2) {
+                    $ResultArray[$key2] = "Y";
+                    break;
+                }
+            }
+        }
+        //查看比對結果
+        foreach ($ResultArray as $Data) {
+            if ($Data == "N") {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

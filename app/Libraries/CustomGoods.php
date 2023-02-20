@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Controllers\Admin\CustomGoods;
+namespace App\Libraries;
 
-class Common
+class CustomGoods
 {
     // 依據"客製規格編號"或"客製規格分類編號"，找出"客製規格和分類列表"資料
     public static function findCustomSpecList(string $GoodsID, array $SpecCategoryIDArray, array $CustomSpecIDArray)

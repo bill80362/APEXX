@@ -179,6 +179,7 @@ class Checkout extends BaseController
                 "GoodsID"=>$Data["GoodsID"],
                 "ColorID"=>$Data["ColorID"],
                 "SizeID"=>$Data["SizeID"],
+                "CustomSpecID"=>$Data["CustomSpecID"],
                 "DeliverWeight"=>$Data["DeliverWeight"],
                 "DeliverVolume"=>$Data["DeliverVolume"],
                 "DiscountID_PercentMenu"=>$Data["DiscountPercentMenuInfo"]["DiscountID"]??0,
@@ -197,22 +198,34 @@ class Checkout extends BaseController
             $ErrorMsg = implode(",", $oSubTrade->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
-        //訂單建立成功，清除購物車
-        $oShoppingCart = new \App\Models\ShoppingCart\ShoppingCart();
-        $oShoppingCart->protect(false);
-        foreach ($CheckoutList as $Data) {
-            $oShoppingCart->resetQuery();
-            $oShoppingCart->where("MemberID", $LoginMemberID);
-            $oShoppingCart->where("GoodsID", $Data["GoodsID"]);
-            $oShoppingCart->where("ColorID", $Data["ColorID"]);
-            $oShoppingCart->where("SizeID", $Data["SizeID"]);
-            $oShoppingCart->delete();
-        }
+        // //訂單建立成功，清除購物車
+        // $oShoppingCart = new \App\Models\ShoppingCart\ShoppingCart();
+        // $oShoppingCart->protect(false);
+        // foreach ($CheckoutList as $Data) {
+        //     $oShoppingCart->resetQuery();
+        //     $oShoppingCart->where("MemberID", $LoginMemberID);
+        //     $oShoppingCart->where("GoodsID", $Data["GoodsID"]);
+        //     $oShoppingCart->where("ColorID", $Data["ColorID"]);
+        //     $oShoppingCart->where("SizeID", $Data["SizeID"]);
+        //     $oShoppingCart->delete();
+        // }
         //扣商品庫存
         $oGoodsStock = new \App\Models\Goods\GoodsStock();
         $oGoodsStock->protect(false);
         foreach ($CheckoutList as $Data) {
+            // 排除客製化商品
+            if (isset($Data["IsCustom"]) && $Data["IsCustom"] == "Y") {
+                continue;
+            }
             $oGoodsStock->ioStock($Data["GoodsID"], $Data["ColorID"], $Data["SizeID"], "-1");
+        }
+        $oCustomGoodsStock = new \App\Models\CustomGoods\CustomGoodsStock();
+        $oCustomGoodsStock->protect(false);
+        foreach ($CheckoutList as $Data) {
+            // 客製化商品
+            if (isset($Data["IsCustom"]) && $Data["IsCustom"] == "Y") {
+                $oCustomGoodsStock->ioStock($Data["GoodsID"], "-1");
+            }
         }
         //扣折扣碼使用量
         $useCouponID = $oLibCheckout->CouponInfo["CouponID"]??0;
