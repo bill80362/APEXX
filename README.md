@@ -44,15 +44,23 @@
 
 - 統計到此階段「商品優惠分類折扣後的金額加總」(DiscountMenuTotal)
 
+#### =====分類滿額免運(有設定MenuID)=====
+- 統計各個優惠，會考量符合MenuID對應商品ID，才會列入統計。
+- 商品統計金額為 商品優惠分類打折價格(SellPrice*DiscountPercentMenu/100)
+- ShippingFree 是否免運
+- DiscountID_ShippingFree 使用優惠免運的優惠ID
+
+#### =====分類滿額送贈品(有設定MenuID)=====
+- 統計各個優惠，會考量符合MenuID對應商品ID，才會列入統計。
+- 商品統計金額為 商品優惠分類打折價格(SellPrice*DiscountPercentMenu/100)
+- 統計後，有過門檻的會紀錄贈品資訊(GiveInfo)，可以多筆。
+
 #### =====全館優惠打折(無設定MenuID)=====
 - 「優惠折扣的金額累積」(購物車各個商品的CheckoutPrice為統計全館優惠累積)
-- 根據設定的MenuID應商品ID，才會列入統計全館優惠累積(設定CheckoutPrice = DiscountMenuTotal)
+~~- 根據設定的MenuID應商品ID，才會列入統計全館優惠累積(設定CheckoutPrice = DiscountMenuTotal)~~
 - 全館折扣統計完畢之後有符合到門檻的，各購物車商品會計入
 - DiscountPercentFull 全館折扣
 - DiscountPercentFullInfo 吃到的優惠ID
-
-- PS 全館優惠打折，可能有Bug，沒有設定MenuID會是全館，但是全館統計又要設定MenuID才列入統計，導致會根本無作用。
-
 - 各個商品小計為 DiscountPrice = 售價x分類打折x全館打折 (打折會堆疊)
 - 統計到此階段「全館優惠打折折扣後的金額加總」(DiscountFullTotal)
 
@@ -62,12 +70,13 @@
 - CouponInfo 使用的抵用卷資訊
 - 折抵優惠卷後的金額 AfterCouponTotal = DiscountFullTotal - 優惠卷折抵金額
 
-#### =====是否有免運(無考慮MenuID)=====
-- AfterCouponTotal 大於優惠免運設定的門檻
+#### =====是否有免運(無MenuID)=====
+- AfterCouponTotal 大於優惠門檻
 - ShippingFree 是否免運
 - DiscountID_ShippingFree 使用優惠免運的優惠ID
 
-#### =====是否有贈品(無考慮MenuID)=====
+#### =====是否有贈品(無MenuID)=====
+- AfterCouponTotal 大於優惠門檻
 - GiveInfo 取得的贈品優惠資訊
 
 #### =====計算退貨金額 平均分配 現金折抵優惠券 ====

@@ -19,7 +19,7 @@ class Checkout
     //免運優惠、贈品
     public $ShippingFree = false;//是否免運費
     public $DiscountID_ShippingFree = 0;//免運使用的優惠ID
-    public $GiveInfo = [];//贈品資訊
+    public $GiveInfo = [];//贈品資訊(多筆)
     public $CouponInfo = [];
     //
     public $TotalDeliverWeight = 0;//重量加總
@@ -187,9 +187,9 @@ class Checkout
             //優惠包含的商品ID
             $DiscountList[$key]["GoodsIDArray"] = $MenuIDKeyValue[$Data["MenuID"]] ?? [];
         }
-        /**分類折扣的金額累積**/
+        /**分類[折扣]的金額累積**/
         foreach ($DiscountList as $key => $Data) {
-            if ($Data["MenuID"]) {
+            if ($Data["DiscountType"] == "P" && $Data["MenuID"]) {
                 foreach ($List as $ShopCartData) {
                     if (in_array($ShopCartData["GoodsID"], $Data["GoodsIDArray"], true)) {
                         $DiscountList[$key]["CheckoutPrice"] = $DiscountList[$key]["CheckoutPrice"]??0;
@@ -217,13 +217,48 @@ class Checkout
             //商品優惠分類折扣後的金額加總
             $this->DiscountMenuTotal += round($List[$key]["SellPrice"]*$List[$key]["DiscountPercentMenu"]/100);
         }
+        /**分類滿額免運**/
+        foreach ($DiscountList as $key => $Data) {
+            if ($Data["DiscountType"] == "D" && $Data["MenuID"]) {
+                foreach ($List as $ShopCartData) {
+                    if (in_array($ShopCartData["GoodsID"], $Data["GoodsIDArray"], true)) {
+                        $DiscountList[$key]["CheckoutPrice"] = $DiscountList[$key]["CheckoutPrice"]??0;
+                        $DiscountList[$key]["CheckoutPrice"] += round($List[$key]["SellPrice"]*$List[$key]["DiscountPercentMenu"]/100);//商品優惠分類折扣後的金額
+                    }
+                }
+            }
+        }
+        foreach ($DiscountList as $DiscountData) {
+            if ($DiscountData["DiscountType"] == "D" && !$DiscountData["MenuID"] && $DiscountData["CheckoutPrice"] >= $DiscountData["Threshold"]) {
+                $this->ShippingFree = true;
+                $this->DiscountID_ShippingFree = $DiscountData["DiscountID"];
+            }
+        }
+        /**分類滿額送贈品**/
+        //金額累計-使用商品優惠分類折扣後的金額
+        foreach ($DiscountList as $key => $Data) {
+            if ($Data["DiscountType"] == "G" && $Data["MenuID"]) {
+                foreach ($List as $ShopCartData) {
+                    if (in_array($ShopCartData["GoodsID"], $Data["GoodsIDArray"], true)) {
+                        $DiscountList[$key]["CheckoutPrice"] = $DiscountList[$key]["CheckoutPrice"]??0;
+                        $DiscountList[$key]["CheckoutPrice"] += round($List[$key]["SellPrice"]*$List[$key]["DiscountPercentMenu"]/100);//商品優惠分類折扣後的金額
+                    }
+                }
+            }
+        }
+        //查看有過門檻的贈品
+        foreach ($DiscountList as $DiscountData) {
+            if ($DiscountData["DiscountType"] == "G" && !$DiscountData["MenuID"] && $DiscountData["CheckoutPrice"] >= $DiscountData["Threshold"]) {
+                $this->GiveInfo[] = $DiscountData;
+            }
+        }
         /**全館優惠金額累積 使用分類折扣後的金額加總**/
         foreach ($DiscountList as $key => $Data) {
             //優惠有指定商品分類，統計該分類金額
             foreach ($List as $ShopCartData) {
-                if (in_array($ShopCartData["GoodsID"], $Data["GoodsIDArray"], true)) {
+//                if (in_array($ShopCartData["GoodsID"], $Data["GoodsIDArray"], true)) {
                     $DiscountList[$key]["CheckoutPrice"] = $this->DiscountMenuTotal;
-                }
+//                }
             }
         }
         /**全館打折**/
@@ -279,19 +314,22 @@ class Checkout
         }
         $CouponMoney = $this->CouponInfo["Money"]??0;
         $this->AfterCouponTotal = $this->DiscountFullTotal - $CouponMoney;
-        /**是否有免運**/
-        foreach ($DiscountList as $DiscountData) {
-            //免運優惠、統計金額有過門檻 使用現金折抵後的金額
-            if ($DiscountData["DiscountType"] == "D" &&  $this->AfterCouponTotal >= $DiscountData["Threshold"]) {
-                $this->ShippingFree = true;
-                $this->DiscountID_ShippingFree = $DiscountData["DiscountID"];
+        /**全館免運**/
+        if(!$this->ShippingFree){
+            //已經免運，就不用再計算
+            foreach ($DiscountList as $DiscountData) {
+                //免運優惠、統計金額有過門檻 使用現金折抵後的金額
+                if ($DiscountData["DiscountType"] == "D" && !$DiscountData["MenuID"] &&  $this->AfterCouponTotal >= $DiscountData["Threshold"]) {
+                    $this->ShippingFree = true;
+                    $this->DiscountID_ShippingFree = $DiscountData["DiscountID"];
+                }
             }
         }
-        /**是否有贈品**/
+        /**全館送贈品**/
         foreach ($DiscountList as $DiscountData) {
             //贈品、統計金額有過門檻
-            if ($DiscountData["DiscountType"] == "G" && $DiscountData["CheckoutPrice"] >= $DiscountData["Threshold"]) {
-                $this->GiveInfo = $DiscountData;
+            if ($DiscountData["DiscountType"] == "G" && !$DiscountData["MenuID"] && $this->AfterCouponTotal >= $DiscountData["Threshold"]) {
+                $this->GiveInfo[] = $DiscountData;
             }
         }
         /**計算退貨金額 平均分配 現金折抵優惠券 **/
