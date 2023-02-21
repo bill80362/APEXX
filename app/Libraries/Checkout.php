@@ -184,7 +184,7 @@ class Checkout
             $List[$key]["CustomSpecID"] = "";
             //如果是會員，以[會員售價]做後續計算
             if ($this->MemberID) {
-                $List[$key]["SellPrice"] = $Data["MemberSellPrice"]??$$Data["SellPrice"];
+                $List[$key]["SellPrice"] = $Data["MemberSellPrice"]?:$Data["SellPrice"];
             }
         }
         foreach ($GoodsStockArray as $Data) {
