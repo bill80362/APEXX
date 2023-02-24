@@ -245,7 +245,7 @@ class Checkout
                 $CustomSpecIDArray = explode(",", $Data["CustomSpecID"]);
                 //消費者目前有購買的規格分類
                 if (count($CustomSpecIDArray)>0) {
-                    $PurchaseSpecCategoryIDArray = \App\Libraries\CustomGoods::findCustomSpecList($Data["GoodsID"], [], $CustomSpecIDArray);
+                    $PurchaseSpecCategoryIDArray = \App\Libraries\CustomGoods::findCustomSpecList([$Data["GoodsID"]], [], $CustomSpecIDArray);
                 }
                 //商品本身對應到的規格分類
                 if (isset($Data["SpecCategoryID"]) && $Data["SpecCategoryID"] != "") {

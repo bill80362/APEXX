@@ -86,6 +86,39 @@ class Goods extends BaseController
                 $CustomGoodsStockKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
             }
         }
+        //關聯"客製規格和分類列表"資料
+        $CustomSpecListKeyValue = [];
+        if (count($List)) {
+            $GoodsIDArray = array_column($List, "GoodsID");
+            $Temp = \App\Libraries\CustomGoods::findCustomSpecList($GoodsIDArray, [], []);
+            if (count($Temp) > 0) {
+                $CustomSpecListKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
+            }
+        }
+        //關聯客製化商品規格黑名單
+        $CustomGoodsSpecBlacklistKV = [];
+        if (count($List)) {
+            $GoodsIDArray = array_column($List, "GoodsID");
+            $oCustomGoodsSpecBlacklist = new \App\Models\CustomGoods\CustomGoodsSpecBlacklist();
+            $oCustomGoodsSpecBlacklist->whereIn("CustomGoodsSpecBlacklist.GoodsID", $GoodsIDArray);
+            $oCustomGoodsSpecBlacklist->orderBy("CustomGoodsSpecBlacklist.BlacklistID", "ASC");
+            $Temp = $oCustomGoodsSpecBlacklist->findAll();
+            if (count($Temp) > 0) {
+                $CustomGoodsSpecBlacklistKV = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
+            }
+        }
+        //客製化商品規格組合異動價
+        $CustomGoodsChangePriceKV = [];
+        if (count($List)) {
+            $GoodsIDArray = array_column($List, "GoodsID");
+            $oCustomGoodsChangePrice = new \App\Models\CustomGoods\CustomGoodsChangePrice();
+            $oCustomGoodsChangePrice->whereIn("CustomGoodsChangePrice.GoodsID", $GoodsIDArray);
+            $oCustomGoodsChangePrice->orderBy("CustomGoodsChangePrice.ChangePriceID", "ASC");
+            $Temp = $oCustomGoodsChangePrice->findAll();
+            if (count($Temp) > 0) {
+                $CustomGoodsChangePriceKV = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
+            }
+        }
         //關聯圖片
 //        $GoodsPictureKeyValue = [];
 //        if(count($List)){
@@ -102,6 +135,9 @@ class Goods extends BaseController
             $List[$key]["Menu"]  = $Menu2GoodsKeyValue[$List[$key]["GoodsID"]] ?? [];
             $List[$key]["Stock"] = $GoodsStockKeyValue[$List[$key]["GoodsID"]] ?? [];
             $List[$key]["CustomGoodsStock"] = $CustomGoodsStockKeyValue[$List[$key]["GoodsID"]] ?? [];
+            $List[$key]["CustomSpecList"] = $CustomSpecListKeyValue[$List[$key]["GoodsID"]] ?? [];
+            $List[$key]["CustomGoodsSpecBlacklist"] = $CustomGoodsSpecBlacklistKV[$List[$key]["GoodsID"]] ?? [];
+            $List[$key]["CustomGoodsChangePrice"] = $CustomGoodsChangePriceKV[$List[$key]["GoodsID"]] ?? [];
 //            $List[$key]["Picture"] = $GoodsPictureKeyValue[$List[$key]["GoodsID"]]??[];
         }
 
@@ -182,12 +218,60 @@ class Goods extends BaseController
             $CustomGoodsStockKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
         }
 
+        //關聯"客製規格和分類列表"資料
+        $CustomSpecListKeyValue = [];
+        $GoodsIDArray = [$Data["GoodsID"]];
+        $Temp = \App\Libraries\CustomGoods::findCustomSpecList($GoodsIDArray, [], []);
+        if (count($Temp) > 0) {
+            //關聯客製規格圖片
+            $CustomGoodsSpecPictureKV = [];
+            $CustomSpecIDArray = array_column($Temp, "CustomSpecID");
+            $oCustomGoodsSpecPicture = new \App\Models\CustomGoods\CustomGoodsSpecPicture();
+            $oCustomGoodsSpecPicture->whereIn("CustomGoodsSpecPicture.CustomSpecID", $CustomSpecIDArray);
+            $oCustomGoodsSpecPicture->orderBy("CustomGoodsSpecPicture.Seq", "ASC");
+            $oCustomGoodsSpecPicture->orderBy("CustomGoodsSpecPicture.SpecPictureID", "ASC");
+            $Temp2 = $oCustomGoodsSpecPicture->findAll();
+            if (count($Temp2) > 0) {
+                $CustomGoodsSpecPictureKV = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp2, "CustomSpecID");
+            }
+            //放入資料
+            foreach ($Temp as $key => $Picture) {
+                $Temp[$key]["CustomGoodsSpecPicture"] = $CustomGoodsSpecPictureKV[$Temp[$key]["CustomSpecID"]] ?? [];
+            }
+            $CustomSpecListKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
+        }
+
+        //關聯客製化商品規格黑名單
+        $CustomGoodsSpecBlacklistKV = [];
+        $GoodsIDArray = [$Data["GoodsID"]];
+        $oCustomGoodsSpecBlacklist = new \App\Models\CustomGoods\CustomGoodsSpecBlacklist();
+        $oCustomGoodsSpecBlacklist->whereIn("CustomGoodsSpecBlacklist.GoodsID", $GoodsIDArray);
+        $oCustomGoodsSpecBlacklist->orderBy("CustomGoodsSpecBlacklist.BlacklistID", "ASC");
+        $Temp = $oCustomGoodsSpecBlacklist->findAll();
+        if (count($Temp) > 0) {
+            $CustomGoodsSpecBlacklistKV = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
+        }
+
+        //客製化商品規格組合異動價
+        $CustomGoodsChangePriceKV = [];
+        $GoodsIDArray = [$Data["GoodsID"]];
+        $oCustomGoodsChangePrice = new \App\Models\CustomGoods\CustomGoodsChangePrice();
+        $oCustomGoodsChangePrice->whereIn("CustomGoodsChangePrice.GoodsID", $GoodsIDArray);
+        $oCustomGoodsChangePrice->orderBy("CustomGoodsChangePrice.ChangePriceID", "ASC");
+        $Temp = $oCustomGoodsChangePrice->findAll();
+        if (count($Temp) > 0) {
+            $CustomGoodsChangePriceKV = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
+        }
+
         //放入資料
         $Data["Menu"]     = $Menu2GoodsKeyValue[$Data["GoodsID"]] ?? [];
         $Data["Stock"]    = $GoodsStockKeyValue[$Data["GoodsID"]] ?? [];
         $Data["Picture"]  = $GoodsPictureKeyValue[$Data["GoodsID"]] ?? [];
         $Data["Discount"] = $GoodsDiscountKeyValue[$Data["GoodsID"]] ?? [];
         $Data["CustomGoodsStock"] = $CustomGoodsStockKeyValue[$Data["GoodsID"]] ?? [];
+        $Data["CustomSpecList"] = $CustomSpecListKeyValue[$Data["GoodsID"]] ?? [];
+        $Data["CustomGoodsSpecBlacklist"] = $CustomGoodsSpecBlacklistKV[$Data["GoodsID"]] ?? [];
+        $Data["CustomGoodsChangePrice"] = $CustomGoodsChangePriceKV[$Data["GoodsID"]] ?? [];
         //Res
         return $this->respond(ResponseData::success($Data));
     }
