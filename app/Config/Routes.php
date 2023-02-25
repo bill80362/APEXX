@@ -272,6 +272,8 @@ $routes->group('admin', ["filter"=>"AdminAuth"], function ($routes) {
     $routes->get('trade/ECLogistics/(:num)', 'Admin\Trade\Trade::sendECLogistics/$1');//711或全家貨到付款-列印出貨單-出貨狀態修改
     //Member
     $routes->get('member', 'Admin\Member\Member::getList');
+    /**ChatGPT*/
+    $routes->post('ChatGPT/Completions', 'Admin\ChatGPT\ChatGPT::getCompletions');
 });
 /**會員端***/
 $routes->group('member', [], function ($routes) {
