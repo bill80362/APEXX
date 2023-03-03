@@ -131,7 +131,7 @@ class ECPay
                 'TradeDesc' => "訂單編號:".$Data["TradeID"],
 
                 'ServerReplyURL' => base_url().'/ECPay/notify/ServerReplyLogistics',//物流狀態都會透過此URL通知
-                'ClientReplyURL' => 'https://www.kolshop.com.tw/order_create/'.$Data["TradeID"],//按下按鈕過去結帳後，會先過去EC，再馬上回來的路徑，背景作業可以不填
+                'ClientReplyURL' => $_ENV["app.frontURL"].'/order_create/'.$Data["TradeID"],//按下按鈕過去結帳後，會先過去EC，再馬上回來的路徑，背景作業可以不填
                 'LogisticsC2CReplyURL' => base_url() . '/api/ServerReplyLogisticsStore',//當 User 選擇取貨門市有問題時，會透過此 URL 通知特店，請特店通知 User 重新選擇門市。
 
                 'Remark' => "訂單編號:".$Data["TradeID"],//這邊放入產品細目
@@ -179,8 +179,8 @@ class ECPay
             //不同付款方式、不同參數
             if ($PaymentData["PaymentType"]=="ATM") {
                 //導回前端的網址
-                $input["ClientBackURL"] = "https://www.kolshop.com.tw/order_create/".$Data["TradeID"];
-                $input["OrderResultURL"] = "https://www.kolshop.com.tw/order_create/".$Data["TradeID"];
+                $input["ClientBackURL"] = $_ENV["app.frontURL"]."/order_create/".$Data["TradeID"];
+                $input["OrderResultURL"] = $_ENV["app.frontURL"]."/order_create/".$Data["TradeID"];
                 //繳費期限 (預設3天，最長60天，最短1天)
                 $input["ExpireDate"] = 3;
                 //伺服器端回傳付款相關資訊
@@ -198,7 +198,7 @@ class ECPay
                 $input["PaymentInfoURL"] = base_url().'/ECPay/notify/ServerReplyAIO';
             } elseif ($PaymentData["PaymentType"]=="Credit") {
                 //導回前端的網址
-                $input["ClientBackURL"] = "https://www.kolshop.com.tw/order_create/".$Data["TradeID"];
+                $input["ClientBackURL"] = $_ENV["app.frontURL"]."/order_create/".$Data["TradeID"];
                 //不使用的付款方式
                 $input["IgnorePayment"] = ECPay_PaymentMethod::GooglePay;
                 //Credit信用卡分期付款延伸參數(可依系統需求選擇是否代入)

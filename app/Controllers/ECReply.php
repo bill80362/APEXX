@@ -8,7 +8,7 @@ class ECReply extends BaseController
     {
         $PostData = $this->request->getPost();
         //Log
-        $oECReply = new \App\Models\ECReply\NotifyReply();
+        $oECReply = new \App\Models\ECReply\ECReply();
         $oECReply->protect(false);
         $oECReply->insert([
             "PostData"=>print_r($PostData, true),
@@ -17,7 +17,7 @@ class ECReply extends BaseController
         $oLibECPay = new \App\Libraries\Payment\ECPay();
         $ECPayData = $oLibECPay->replyAIO($PostData);
         //Log
-        $oECReply = new \App\Models\ECReply\NotifyReply();
+        $oECReply = new \App\Models\ECReply\ECReply();
         $oECReply->protect(false);
         $oECReply->insert([
             "PostData"=>print_r($ECPayData, true),
@@ -167,7 +167,7 @@ class ECReply extends BaseController
     {
         $PostData = $this->request->getPost();
         //Log
-        $oECReply = new \App\Models\ECReply\NotifyReply();
+        $oECReply = new \App\Models\ECReply\ECReply();
         $oECReply->protect(false);
         $oECReply->insert([
             "PostData"=>print_r($PostData, true),
@@ -176,7 +176,7 @@ class ECReply extends BaseController
         $oLibECPay = new \App\Libraries\Payment\ECPay();
         $ECPayData = $oLibECPay->replyCVS($PostData);
         //Log
-        $oECReply = new \App\Models\ECReply\NotifyReply();
+        $oECReply = new \App\Models\ECReply\ECReply();
         $oECReply->protect(false);
         $oECReply->insert([
             "PostData"=>print_r($ECPayData, true),
@@ -238,7 +238,7 @@ class ECReply extends BaseController
         foreach ($PostData as $key => $value) {
             $Attr[] = $key."=".$value;
         }
-        $redirectURL = "https://www.kolshop.com.tw/cart?".implode("&", $Attr);
+        $redirectURL = $_ENV["app.frontURL"]."/cart?".implode("&", $Attr);
         return redirect()->to($redirectURL);
     }
 }

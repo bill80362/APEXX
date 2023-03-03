@@ -19,7 +19,7 @@ class Payment
         $oPayment = new \App\Models\Payment\Payment();
         $PaymentData = $oPayment->find($TradeInsertData["PaymentID"]);
         if ($PaymentData) {
-            if (in_array($PaymentData["PaymentID"], ["Credit","ATM","CVS"], true)) {
+            if (in_array($PaymentData["PaymentType"], ["Credit","ATM","CVS"], true)) {
                 //綠界信用卡、ATM、超商代碼
                 $oLibECPay = new \App\Libraries\Payment\ECPay();
                 $PaymentHTML = $oLibECPay->getHTML_AIO($TradeInsertData, $PaymentData);
