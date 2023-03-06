@@ -198,17 +198,23 @@ class Checkout extends BaseController
             $ErrorMsg = implode(",", $oSubTrade->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
-        // //訂單建立成功，清除購物車
-        // $oShoppingCart = new \App\Models\ShoppingCart\ShoppingCart();
-        // $oShoppingCart->protect(false);
-        // foreach ($CheckoutList as $Data) {
-        //     $oShoppingCart->resetQuery();
-        //     $oShoppingCart->where("MemberID", $LoginMemberID);
-        //     $oShoppingCart->where("GoodsID", $Data["GoodsID"]);
-        //     $oShoppingCart->where("ColorID", $Data["ColorID"]);
-        //     $oShoppingCart->where("SizeID", $Data["SizeID"]);
-        //     $oShoppingCart->delete();
-        // }
+        //訂單建立成功，清除購物車
+        $oShoppingCart = new \App\Models\ShoppingCart\ShoppingCart();
+        $oShoppingCart->protect(false);
+        foreach ($CheckoutList as $Data) {
+            $oShoppingCart->resetQuery();
+            $oShoppingCart->where("MemberID", $LoginMemberID);
+            $oShoppingCart->where("GoodsID", $Data["GoodsID"]);
+            if (isset($Data["IsCustom"]) && $Data["IsCustom"] == "Y") {
+                // 客製化商品
+                $oShoppingCart->where("CustomSpecID", $Data["CustomSpecID"]);
+            } else {
+                // 一般商品
+                $oShoppingCart->where("ColorID", $Data["ColorID"]);
+                $oShoppingCart->where("SizeID", $Data["SizeID"]);
+            }
+            $oShoppingCart->delete();
+        }
         //扣商品庫存
         $oGoodsStock = new \App\Models\Goods\GoodsStock();
         $oGoodsStock->protect(false);

@@ -34,6 +34,7 @@ class SubTrade extends Model
         "GoodsID" => "required|numeric",
         "ColorID" => "required|numeric",
         "SizeID" => "required|numeric",
+        "CustomSpecID" => "required",
         "DeliverWeight" => "required|numeric",
         "DeliverVolume" => "required|numeric",
         "DiscountPercentMenu" => "required|numeric",

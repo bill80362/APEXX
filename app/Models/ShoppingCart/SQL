@@ -4,6 +4,7 @@ CREATE TABLE `ShoppingCart` (
   `GoodsID` int(11) NOT NULL,
   `ColorID` int(11) NOT NULL,
   `SizeID` int(11) NOT NULL,
+  `CustomSpecID` text NOT NULL COMMENT '由客製規格編號(CustomSpecID)串接而成，依逗號分隔',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
