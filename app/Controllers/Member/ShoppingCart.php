@@ -27,14 +27,23 @@ class ShoppingCart extends BaseController
         $LoginMemberID = \Config\Services::getLoginMember()->getID();
         //
         $GoodsID = $this->request->getVar("GoodsID");
-        $ColorID = $this->request->getVar("ColorID");
-        $SizeID = $this->request->getVar("SizeID");
+        $ColorID = $this->request->getVar("ColorID")??-1;
+        $SizeID = $this->request->getVar("SizeID")??-1;
+        $CustomSpecID = $this->request->getVar("CustomSpecID")??-1;
         //檢查商品是否能放入購物車
-        $oGoodsStock = new \App\Models\Goods\GoodsStock();
-        $oGoodsStock->where("GoodsID", $GoodsID);
-        $oGoodsStock->where("ColorID", $ColorID);
-        $oGoodsStock->where("SizeID", $SizeID);
-        $GoodsStockData = $oGoodsStock->first();
+        if (isset($CustomSpecID) && $CustomSpecID == -1) {
+            // 一般商品
+            $oGoodsStock = new \App\Models\Goods\GoodsStock();
+            $oGoodsStock->where("GoodsID", $GoodsID);
+            $oGoodsStock->where("ColorID", $ColorID);
+            $oGoodsStock->where("SizeID", $SizeID);
+            $GoodsStockData = $oGoodsStock->first();
+        } else {
+            // 客製化商品
+            $oCustomGoodsStock = new \App\Models\CustomGoods\CustomGoodsStock();
+            $oCustomGoodsStock->where("GoodsID", $GoodsID);
+            $GoodsStockData = $oCustomGoodsStock->first();
+        }
         if (!$GoodsStockData) {
             return $this->respond(ResponseData::fail("商品庫存資訊錯誤"));
         }
@@ -52,6 +61,7 @@ class ShoppingCart extends BaseController
             "GoodsID"=>$GoodsID,
             "ColorID"=>$ColorID,
             "SizeID"=>$SizeID,
+            "CustomSpecID"=>$CustomSpecID,
         ]);
         if ($oShoppingCart->errors()) {
             $ErrorMsg = implode(",", $oShoppingCart->errors());

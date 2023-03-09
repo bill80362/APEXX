@@ -28,6 +28,7 @@ class ShoppingCart extends Model
         "GoodsID" => "required|numeric",
         "ColorID" => "required|numeric",
         "SizeID" => "required|numeric",
+        "CustomSpecID" => "required",
     ];
     protected $validationMessages = [
         "MemberID" => [
@@ -45,6 +46,9 @@ class ShoppingCart extends Model
         "SizeID" => [
             "required" => "尺寸ID為必填",
             "numeric" => "尺寸ID必須是整數",
+        ],
+        "CustomSpecID" => [
+            "required" => "客製規格編號為必填",
         ],
     ];
     protected $skipValidation     = false;

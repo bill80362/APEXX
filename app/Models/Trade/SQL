@@ -1,0 +1,112 @@
+
+--
+-- 資料表結構 `SubTrade`
+--
+
+CREATE TABLE `SubTrade` (
+  `SubTradeID` int(11) NOT NULL,
+  `TradeID` bigint(20) NOT NULL,
+  `Status` char(1) NOT NULL COMMENT 'Y正常F退貨',
+  `GoodsID` int(11) NOT NULL,
+  `ColorID` int(11) NOT NULL,
+  `SizeID` int(11) NOT NULL,
+  `CustomSpecID` text NOT NULL COMMENT ' 由客製規格編號(CustomSpecID)串接而成，依逗號分隔 ',
+  `DeliverWeight` int(11) NOT NULL COMMENT '寄送重量',
+  `DeliverVolume` int(11) NOT NULL COMMENT '寄送體積',
+  `DiscountID_PercentMenu` int(11) NOT NULL,
+  `DiscountPercentMenu` int(11) NOT NULL COMMENT '分類打折',
+  `DiscountID_PercentFull` int(11) NOT NULL,
+  `DiscountPercentFull` int(11) NOT NULL COMMENT '優惠打折全館',
+  `SellPrice` int(11) NOT NULL COMMENT '售價',
+  `FinalPrice` int(11) NOT NULL COMMENT '最終價格=售價x分類打折x全館打折',
+  `RefundPrice` int(11) NOT NULL COMMENT '退款金額(加上現金折抵)',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- 已傾印資料表的索引
+--
+
+--
+-- 資料表索引 `SubTrade`
+--
+ALTER TABLE `SubTrade`
+  ADD PRIMARY KEY (`SubTradeID`);
+
+--
+-- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
+--
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `SubTrade`
+--
+ALTER TABLE `SubTrade`
+  MODIFY `SubTradeID` int(11) NOT NULL AUTO_INCREMENT;
+
+
+-- --------------------------------------------------------
+
+--
+-- 資料表結構 `Trade`
+--
+
+CREATE TABLE `Trade` (
+  `TradeID` bigint(20) NOT NULL,
+  `TradeID_R` varchar(30) NOT NULL,
+  `MemberID` int(11) NOT NULL,
+  `Status` char(1) NOT NULL COMMENT 'W等待回應,P已付款=,T理貨中,S已出貨,A已到貨,F訂單完成,C已取消',
+  `PaymentID` int(11) NOT NULL,
+  `PaymentTime` timestamp NULL DEFAULT NULL COMMENT '付款成功時間',
+  `PaymentSubtotalFee` int(11) NOT NULL COMMENT '金流交易手續費',
+  `ShippingID` int(11) NOT NULL,
+  `ShippingTime` timestamp NULL DEFAULT NULL COMMENT '出貨時間',
+  `ShippingFree` int(11) NOT NULL COMMENT '是否有免運',
+  `ShippingFee` int(11) NOT NULL COMMENT '物流費',
+  `ShippingCode` varchar(30) NOT NULL COMMENT '物流商編號',
+  `CouponID` int(11) NOT NULL COMMENT '折價卷',
+  `CouponMoney` int(11) NOT NULL COMMENT '現金折抵優惠',
+  `DiscountID_Ｇ` int(11) NOT NULL COMMENT '贈品優惠',
+  `GiveName` varchar(200) NOT NULL COMMENT '贈品名稱',
+  `GiveImage` varchar(200) NOT NULL COMMENT '贈品圖',
+  `DiscountID_D` int(11) NOT NULL COMMENT '免運優惠',
+  `Price` int(11) NOT NULL COMMENT '訂單金額(子單退款金額加總)+金流交易手續費+運費',
+  `BuyerName` varchar(100) DEFAULT NULL COMMENT '購買人姓名',
+  `BuyerPhone` varchar(20) DEFAULT NULL COMMENT '購買人電話',
+  `ReceiverName` varchar(100) NOT NULL COMMENT '收件人姓名',
+  `ReceiverPhone` varchar(20) NOT NULL COMMENT '收件人電話',
+  `ReceiverEmail` varchar(50) NOT NULL,
+  `ReceiverAddressCode` varchar(10) NOT NULL COMMENT '收件人郵遞區號',
+  `ReceiverAddress` varchar(200) NOT NULL COMMENT '收件人地址',
+  `ReceiverStoreNo` varchar(20) NOT NULL COMMENT '收件人貨到付款店編號',
+  `ReceiverStoreInfo` varchar(200) NOT NULL,
+  `ReceiverMemo` text NOT NULL,
+  `ThirdPartyID` varchar(50) NOT NULL COMMENT '金流第三方對應ID',
+  `ThirdPartyData` varchar(100) NOT NULL COMMENT '第三方資料',
+  `AdminMemo` text NOT NULL,
+  `OrderMemo` varchar(100) DEFAULT NULL COMMENT '程式Memo',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- 已傾印資料表的索引
+--
+
+--
+-- 資料表索引 `Trade`
+--
+ALTER TABLE `Trade`
+  ADD PRIMARY KEY (`TradeID`);
+
+--
+-- 在傾印的資料表使用自動遞增(AUTO_INCREMENT)
+--
+
+--
+-- 使用資料表自動遞增(AUTO_INCREMENT) `Trade`
+--
+ALTER TABLE `Trade`
+  MODIFY `TradeID` bigint(20) NOT NULL AUTO_INCREMENT;
