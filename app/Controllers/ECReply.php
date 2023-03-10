@@ -26,12 +26,11 @@ class ECReply extends BaseController
         if (!is_array($ECPayData)) {
             exit('0|Error');
         }
-
         //處理資料
         $oTrade = new \App\Models\Trade\Trade();
         $oTrade->join("Payment", "Payment.PaymentID=Trade.PaymentID");
         $oTrade->whereIn("Trade.Status", ["W"]);
-        $TradeData = $oTrade->find($ECPayData["MerchantTradeNo"]);
+        $TradeData = $oTrade->find(substr($ECPayData["MerchantTradeNo"], strlen($oLibECPay->PreCode)));//ECPay前置碼去除
         //找不到資料
         if (!$TradeData) {
             exit('0|Error');
@@ -185,7 +184,7 @@ class ECReply extends BaseController
         $oTrade = new \App\Models\Trade\Trade();
         $oTrade->join("Payment", "Payment.PaymentID=Trade.PaymentID");
         $oTrade->whereIn("Trade.Status", ["W"]);
-        $TradeData = $oTrade->find(substr($ECPayData["MerchantTradeNo"], 5));
+        $TradeData = $oTrade->find(substr($ECPayData["MerchantTradeNo"], strlen($oLibECPay->PreCode)));//ECPay前置碼去除
         if (in_array($TradeData["PaymentType"], ["UNIMARTC2C","FAMIC2C"], true) && $ECPayData["RtnCode"]==300) {
             /**
              * Array
