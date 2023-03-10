@@ -68,6 +68,39 @@ class Goods extends BaseController
             if (count($Temp) > 0) {
                 $CustomGoodsStockKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
             }
+            // 關聯"客製規格和分類列表"資料
+            $CustomSpecListKeyValue = [];
+            if (count($List)) {
+                $GoodsIDArray = array_column($List, "GoodsID");
+                $Temp = \App\Libraries\CustomGoods::findCustomSpecList($GoodsIDArray, [], []);
+                if (count($Temp) > 0) {
+                    $CustomSpecListKeyValue = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
+                }
+            }
+            // 關聯客製化商品規格黑名單
+            $CustomGoodsSpecBlacklistKV = [];
+            if (count($List)) {
+                $GoodsIDArray = array_column($List, "GoodsID");
+                $oCustomGoodsSpecBlacklist = new \App\Models\CustomGoods\CustomGoodsSpecBlacklist();
+                $oCustomGoodsSpecBlacklist->whereIn("CustomGoodsSpecBlacklist.GoodsID", $GoodsIDArray);
+                $oCustomGoodsSpecBlacklist->orderBy("CustomGoodsSpecBlacklist.BlacklistID", "ASC");
+                $Temp = $oCustomGoodsSpecBlacklist->findAll();
+                if (count($Temp) > 0) {
+                    $CustomGoodsSpecBlacklistKV = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
+                }
+            }
+            // 客製化商品規格組合異動價
+            $CustomGoodsChangePriceKV = [];
+            if (count($List)) {
+                $GoodsIDArray = array_column($List, "GoodsID");
+                $oCustomGoodsChangePrice = new \App\Models\CustomGoods\CustomGoodsChangePrice();
+                $oCustomGoodsChangePrice->whereIn("CustomGoodsChangePrice.GoodsID", $GoodsIDArray);
+                $oCustomGoodsChangePrice->orderBy("CustomGoodsChangePrice.ChangePriceID", "ASC");
+                $Temp = $oCustomGoodsChangePrice->findAll();
+                if (count($Temp) > 0) {
+                    $CustomGoodsChangePriceKV = \App\Libraries\Tools\DatabaseTools::ListToKVMultiple($Temp, "GoodsID");
+                }
+            }
         }
         //放入資料
         foreach ($List as $key => $Data) {
@@ -75,6 +108,9 @@ class Goods extends BaseController
             // 關聯庫存，23.0109 彥佐加上，因後台商品資料原本沒有帶庫存資料導致訂單取不到庫存資料
             $List[$key]["Stock"] = $GoodsStockKeyValue[$List[$key]["GoodsID"]] ?? [];
             $List[$key]["CustomGoodsStock"] = $CustomGoodsStockKeyValue[$List[$key]["GoodsID"]] ?? [];
+            $List[$key]["CustomSpecList"] = $CustomSpecListKeyValue[$List[$key]["GoodsID"]] ?? [];
+            $List[$key]["CustomGoodsSpecBlacklist"] = $CustomGoodsSpecBlacklistKV[$List[$key]["GoodsID"]] ?? [];
+            $List[$key]["CustomGoodsChangePrice"] = $CustomGoodsChangePriceKV[$List[$key]["GoodsID"]] ?? [];
 //            $List[$key]["TradeList"] = $TradeKeyValue[$List[$key]["GoodsID"]]??[];
         }
         //Res
