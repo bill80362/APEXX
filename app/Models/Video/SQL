@@ -1,20 +1,25 @@
-CREATE TABLE `AdvertisementCategory` (
-  `AdvertisementCategoryID` int(11) NOT NULL,
+--
+-- 資料表結構 `VideoCategory`
+--
+CREATE TABLE `VideoCategory` (
+  `VideoCategoryID` int(11) NOT NULL,
   `Title` varchar(100) NOT NULL,
   `Seq` int(11) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `AdvertisementCategory`
-  ADD PRIMARY KEY (`AdvertisementCategoryID`);
+ALTER TABLE `VideoCategory` ADD PRIMARY KEY (`VideoCategoryID`);
 
-ALTER TABLE `AdvertisementCategory`
-  MODIFY `AdvertisementCategoryID` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `VideoCategory` MODIFY `VideoCategoryID` int(11) NOT NULL AUTO_INCREMENT;
+
 -- --------------------------------------------------------
-CREATE TABLE `Advertisement` (
-  `AdvertisementID` int(11) NOT NULL,
-  `AdvertisementCategoryID` int(11) NOT NULL,
+--
+-- 資料表結構 `Video`
+--
+CREATE TABLE `Video` (
+  `VideoID` int(11) NOT NULL,
+  `VideoCategoryID` int(11) NOT NULL,
   `Title` varchar(100) NOT NULL,
   `Content1` text,
   `Content2` text,
@@ -26,15 +31,12 @@ CREATE TABLE `Advertisement` (
   `Content8` text,
   `Content9` text,
   `Content10` text,
+  `Image1` varchar(200) NOT NULL,
   `Seq` int(11) NOT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `Advertisement`
-  ADD PRIMARY KEY (`AdvertisementID`);
+ALTER TABLE `Video` ADD PRIMARY KEY (`VideoID`);
 
-ALTER TABLE `Advertisement`
-  MODIFY `AdvertisementID` int(11) NOT NULL AUTO_INCREMENT;
-
-
+ALTER TABLE `Video` MODIFY `VideoID` int(11) NOT NULL AUTO_INCREMENT;

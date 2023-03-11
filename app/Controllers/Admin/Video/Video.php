@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Controllers\Admin\Advertisement;
+namespace App\Controllers\Admin\Video;
 
 use App\Controllers\BaseController;
 use App\Libraries\ResponseData;
 use CodeIgniter\API\ResponseTrait;
 
-class Advertisement extends BaseController
+class Video extends BaseController
 {
     use ResponseTrait;
-    public $ImageDirPath = "/image/advertisement";
+    public $ImageDirPath = "/image/Video";
     public function getList()
     {
         //
-        $oAdvertisement = new \App\Models\Advertisement\Advertisement();
-        $oAdvertisement->orderBy("Seq");
-        $oAdvertisement->orderBy("AdvertisementID", "DESC");
-        $List = $oAdvertisement->findAll();
+        $oVideo = new \App\Models\Video\Video();
+        $oVideo->orderBy("Seq");
+        $oVideo->orderBy("VideoID", "DESC");
+        $List = $oVideo->findAll();
         //Res
         return $this->respond(ResponseData::success($List));
     }
@@ -30,16 +30,16 @@ class Advertisement extends BaseController
         }
         $Seq = $this->request->getVar("Seq");
         //檢查目錄ID
-        $oCategory = new \App\Models\Advertisement\Category();
+        $oCategory = new \App\Models\Video\Category();
         $Data = $oCategory->find($CategoryID);
         if (!$Data) {
             return $this->respond(ResponseData::fail("目錄ID有誤"));
         }
         //
-        $oAdvertisement = new \App\Models\Advertisement\Advertisement();
-        $oAdvertisement->protect(false);
-        $AdvertisementID = $oAdvertisement->insert([
-            "AdvertisementCategoryID"=>$CategoryID,
+        $oVideo = new \App\Models\Video\Video();
+        $oVideo->protect(false);
+        $VideoID = $oVideo->insert([
+            "VideoCategoryID"=>$CategoryID,
             "Title"=>$Title,
             "Content1"=>$Content1,
             "Content2"=>$Content2,
@@ -53,12 +53,12 @@ class Advertisement extends BaseController
             "Content10"=>$Content10,
             "Seq"=>$Seq,
         ]);
-        if ($oAdvertisement->errors()) {
-            $ErrorMsg = implode(",", $oAdvertisement->errors());
+        if ($oVideo->errors()) {
+            $ErrorMsg = implode(",", $oVideo->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
-        $Data = $oAdvertisement->find($AdvertisementID);
+        $Data = $oVideo->find($VideoID);
         return $this->respond(ResponseData::success($Data));
     }
     public function update()
@@ -71,15 +71,15 @@ class Advertisement extends BaseController
         }
         $Seq = $this->request->getVar("Seq");
         //
-        $oAdvertisement = new \App\Models\Advertisement\Advertisement();
+        $oVideo = new \App\Models\Video\Video();
         //檢查ID
-        $Data = $oAdvertisement->find($ID);
+        $Data = $oVideo->find($ID);
         if (!$Data) {
             return $this->respond(ResponseData::fail("找不到該筆資料"));
         }
         //開始更新
-        $oAdvertisement->protect(false);
-        $oAdvertisement->update($ID, [
+        $oVideo->protect(false);
+        $oVideo->update($ID, [
             "Title"=>$Title,
             "Content1"=>$Content1,
             "Content2"=>$Content2,
@@ -93,28 +93,28 @@ class Advertisement extends BaseController
             "Content10"=>$Content10,
             "Seq"=>$Seq,
         ]);
-        if ($oAdvertisement->errors()) {
-            $ErrorMsg = implode(",", $oAdvertisement->errors());
+        if ($oVideo->errors()) {
+            $ErrorMsg = implode(",", $oVideo->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
-        $Data = $oAdvertisement->find($ID);
+        $Data = $oVideo->find($ID);
         return $this->respond(ResponseData::success($Data));
     }
     public function del($ID)
     {
         //
-        $oAdvertisement = new \App\Models\Advertisement\Advertisement();
+        $oVideo = new \App\Models\Video\Video();
         //檢查ID
-        $Data = $oAdvertisement->find($ID);
+        $Data = $oVideo->find($ID);
         if (!$Data) {
             return $this->respond(ResponseData::fail("找不到該筆資料"));
         }
         //開始刪除
-        $oAdvertisement->protect(false);
-        $oAdvertisement->delete($ID);
-        if ($oAdvertisement->errors()) {
-            $ErrorMsg = implode(",", $oAdvertisement->errors());
+        $oVideo->protect(false);
+        $oVideo->delete($ID);
+        if ($oVideo->errors()) {
+            $ErrorMsg = implode(",", $oVideo->errors());
             return $this->respond(ResponseData::fail($ErrorMsg));
         }
         //Res
@@ -122,9 +122,9 @@ class Advertisement extends BaseController
     }
     public function uploadImage($ID)
     {
-        $oAdvertisement = new \App\Models\Advertisement\Advertisement();
+        $oVideo = new \App\Models\Video\Video();
         //檢查ID
-        $Data = $oAdvertisement->find($ID);
+        $Data = $oVideo->find($ID);
         if (!$Data) {
             return $this->respond(ResponseData::fail("找不到該筆資料"));
         }
@@ -149,13 +149,13 @@ class Advertisement extends BaseController
                 //上傳檔案
                 $file->move(ROOTPATH."/public".$this->ImageDirPath, $name);
                 //更新DB
-                $oAdvertisement->resetQuery();
-                $oAdvertisement->protect(false);
-                $oAdvertisement->update($ID, ["Image".$i=>$this->ImageDirPath."/".$name]);
+                $oVideo->resetQuery();
+                $oVideo->protect(false);
+                $oVideo->update($ID, ["Image".$i=>$this->ImageDirPath."/".$name]);
             }
         }
         //Res
-        $Data = $oAdvertisement->find($ID);
+        $Data = $oVideo->find($ID);
         return $this->respond(ResponseData::success($Data));
     }
     public function updateSeqBatch()
@@ -165,10 +165,10 @@ class Advertisement extends BaseController
             return $this->respond(ResponseData::fail("資料須為陣列"));
         }
         //更新排序
-        $oAdvertisement = new \App\Models\Advertisement\Advertisement();
-        $oAdvertisement->protect(false);
+        $oVideo = new \App\Models\Video\Video();
+        $oVideo->protect(false);
         foreach ($SeqArray as $key=>$Data) {
-            $oAdvertisement->update($Data->ID, ["Seq"=>$Data->Seq]);
+            $oVideo->update($Data->ID, ["Seq"=>$Data->Seq]);
         }
         //Res
         return $this->respond(ResponseData::success([]));

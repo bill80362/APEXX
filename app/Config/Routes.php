@@ -66,6 +66,8 @@ $routes->get('/kol', 'Front\Kol::getList');
 $routes->get('/promote', 'Front\Promote::getList');
 $routes->get('/advertisement', 'Front\Advertisement::getList');
 $routes->get('/advertisement/category', 'Front\Advertisement::getCategoryList');
+$routes->get('/video', 'Front\Video::getList');
+$routes->get('/video/category', 'Front\Video::getCategoryList');
 $routes->get('/menu', 'Front\Menu::getList');
 $routes->get('/menu/category', 'Front\Menu::getCategoryList');
 $routes->get('/weblink', 'Front\WebLink::getList');
@@ -155,6 +157,19 @@ $routes->group('admin', ["filter"=>"AdminAuth"], function ($routes) {
     $routes->delete('advertisement/(:num)', 'Admin\Advertisement\Advertisement::del/$1');
     $routes->post('advertisement/image/(:num)', 'Admin\Advertisement\Advertisement::uploadImage/$1/$2');
     $routes->patch('advertisement/updateSeqBatch', 'Admin\Advertisement\Advertisement::updateSeqBatch');
+    //Video Category
+    $routes->get('video/category', 'Admin\Video\Category::getList');
+    $routes->put('video/category', 'Admin\Video\Category::create');
+    $routes->patch('video/category', 'Admin\Video\Category::update/$1');
+    $routes->delete('video/category/(:num)', 'Admin\Video\Category::del/$1');
+    $routes->patch('video/category/updateSeqBatch', 'Admin\Video\Category::updateSeqBatch');
+    //Video
+    $routes->get('video', 'Admin\Video\Video::getList');
+    $routes->put('video', 'Admin\Video\Video::create');
+    $routes->patch('video', 'Admin\Video\Video::update/$1');
+    $routes->delete('video/(:num)', 'Admin\Video\Video::del/$1');
+    $routes->post('video/image/(:num)', 'Admin\Video\Video::uploadImage/$1/$2');
+    $routes->patch('video/updateSeqBatch', 'Admin\Video\Video::updateSeqBatch');
     //Menu Category
     $routes->get('menu/category', 'Admin\Menu\Category::getList');
     $routes->put('menu/category', 'Admin\Menu\Category::create');
